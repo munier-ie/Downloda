@@ -92,3 +92,15 @@ To compile an Android App Bundle for publication to the Google Play Store:
 ```bash
 flutter build appbundle --release
 ```
+
+---
+
+## Open Source Compliance & Community
+
+Downloda is an open-source project and welcomes community contributions, bug reports, and enhancements. Please review the following files to understand how we maintain a healthy, collaborative, and compliant open-source environment:
+
+*   **[LICENSE](LICENSE)**: Downloda is distributed under the open-source MIT License.
+*   **[CONTRIBUTING.md](CONTRIBUTING.md)**: A complete developer setup guide, explaining how to style your code, compile native dependencies, run local tests, and open pull requests.
+*   **[SECURITY.md](SECURITY.md)**: Outlines our vulnerability disclosure program and details how to report potential security issues privately.
+*   **[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)**: Standards of behavior to ensure a safe, welcoming, and inclusive community for all contributors.
+
