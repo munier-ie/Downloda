@@ -117,14 +117,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               width: 46,
               height: 64,
               decoration: BoxDecoration(
-                color: isSelected ? Colors.white.withValues(alpha: 0.2) : color.withValues(alpha: 0.05),
+                color: isSelected ? context.colorBackground.withValues(alpha: 0.2) : color.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Stack(
                 children: [
-                  Positioned(top: 8, left: 8, right: 8, child: Container(height: 6, decoration: BoxDecoration(color: isSelected ? Colors.white : color, borderRadius: BorderRadius.circular(3)))),
-                  Positioned(top: 20, left: 8, width: 20, child: Container(height: 4, decoration: BoxDecoration(color: (isSelected ? Colors.white : color).withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)))),
-                  Positioned(bottom: 8, right: 8, child: Container(width: 14, height: 14, decoration: BoxDecoration(color: isSelected ? Colors.white : color, shape: BoxShape.circle))),
+                  Positioned(top: 8, left: 8, right: 8, child: Container(height: 6, decoration: BoxDecoration(color: isSelected ? context.colorBackground : color, borderRadius: BorderRadius.circular(3)))),
+                  Positioned(top: 20, left: 8, width: 20, child: Container(height: 4, decoration: BoxDecoration(color: (isSelected ? context.colorBackground : color).withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)))),
+                  Positioned(bottom: 8, right: 8, child: Container(width: 14, height: 14, decoration: BoxDecoration(color: isSelected ? context.colorBackground : color, shape: BoxShape.circle))),
                 ],
               ),
             ),
@@ -132,7 +132,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             Text(
               label,
               style: context.typographyH3.copyWith(
-                color: isSelected ? Colors.white : (isDark ? Colors.white70 : color),
+                color: isSelected ? context.colorBackground : (isDark ? Colors.white70 : color),
                 fontSize: 12,
               ),
             ),
@@ -313,7 +313,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               label: Text(_batteryIgnored ? 'Optimization Disabled' : 'Open Battery Settings'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: _batteryIgnored ? context.colorBackground : _accentColor,
-                foregroundColor: _batteryIgnored ? _accentColor : Colors.white,
+                foregroundColor: _batteryIgnored ? _accentColor : context.colorBackground,
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 elevation: 0,
@@ -512,11 +512,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           children: [
                             Text(
                               _currentPage == _pages.length - 1 ? 'Get Started' : 'Next',
-                              style: context.typographyH3.copyWith(color: Colors.white),
+                              style: context.typographyH3.copyWith(color: context.colorBackground),
                             ),
                             if (_currentPage < _pages.length - 1) ...[
                               const SizedBox(width: 8),
-                              const Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 18),
+                              Icon(Icons.arrow_forward_rounded, color: context.colorBackground, size: 18),
                             ]
                           ],
                         ),

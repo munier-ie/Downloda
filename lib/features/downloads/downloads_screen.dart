@@ -1106,12 +1106,12 @@ class _DownloadDrawerState extends State<_DownloadDrawer> {
               onPressed: _isProcessing ? null : _handleDownload,
               style: ElevatedButton.styleFrom(
                 backgroundColor: context.colorAccent,
-                foregroundColor: Colors.white,
+                foregroundColor: context.colorBackground,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 elevation: 0,
               ),
               child: _isProcessing
-                  ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
+                  ? SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: context.colorBackground, strokeWidth: 3))
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -1638,12 +1638,12 @@ class _PlaylistDrawerState extends State<_PlaylistDrawer> {
                 onPressed: _isProcessing || _selectedVideoIds.isEmpty ? null : _handleDownload,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: context.colorAccent,
-                  foregroundColor: Colors.white,
+                  foregroundColor: context.colorBackground,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 0,
                 ),
                 child: _isProcessing
-                    ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3))
+                    ? SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: context.colorBackground, strokeWidth: 3))
                     : Text(
                         _selectedVideoIds.isEmpty
                             ? 'Select Videos to Download'
