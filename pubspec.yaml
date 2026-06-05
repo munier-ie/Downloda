@@ -86,9 +86,7 @@ flutter:
 
   assets:
     - assets/images/
-    - assets/lottie/
-    - assets/lottie/jsons/
-    - assets/lottie/lotties/
+    - assets/lottie/gifs/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

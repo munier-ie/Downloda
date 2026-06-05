@@ -602,3 +602,8 @@ The project should:
 # 16. Final Product Definition
 
 `dwldr` is a lightweight, background-first media acquisition utility that integrates directly into native mobile sharing workflows, enabling instant downloads with minimal interruption, strong reliability, and efficient system resource usage.
+
+# color paleete
+#385144
+#F8F5F2
+

@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:lottie/lottie.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme.dart';
@@ -239,16 +238,29 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       OnboardingData(
         title: 'The "Invisible" Solution',
         subtitle: 'Stop the copy-paste fatigue. Share any link directly to Downloda and keep browsing. We handle the rest in the background, silently.',
-        hero: Lottie.asset(
-          'assets/lottie/jsons/socialMediaShare.json',
+        hero: Image.asset(
+          'assets/lottie/gifs/Download.gif',
           width: 240, height: 240,
+          fit: BoxFit.contain,
           errorBuilder: (c, e, s) => Icon(Icons.share_rounded, size: 80, color: _accentColor),
         ),
       ),
       OnboardingData(
         title: 'Choose Your Style',
         subtitle: 'Pick a look that suits your eyes. Your preference will be saved across sessions.',
-        hero: _buildThemeSwitcher(),
+        hero: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/lottie/gifs/theme_toggle.gif',
+              width: 140, height: 140,
+              fit: BoxFit.contain,
+              errorBuilder: (c, e, s) => Icon(Icons.palette_rounded, size: 60, color: _accentColor),
+            ),
+            const SizedBox(height: 20),
+            _buildThemeSwitcher(),
+          ],
+        ),
         isThemePage: true,
       ),
       OnboardingData(
@@ -257,9 +269,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         hero: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Lottie.asset(
-              'assets/lottie/jsons/App Privacy.json',
+            Image.asset(
+              'assets/lottie/gifs/secure_privacy.gif',
               width: 200, height: 200,
+              fit: BoxFit.contain,
               errorBuilder: (c, e, s) => Icon(Icons.security_rounded, size: 80, color: _accentColor),
             ),
             const SizedBox(height: 16),
@@ -286,8 +299,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         title: 'Permissions & Access',
         subtitle: 'To provide a seamless experience, we need a few permissions to operate in the background and save your files.',
         hero: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const _PermissionLottieCarousel(),
+            Image.asset(
+              'assets/lottie/gifs/notifications.gif',
+              width: 150, height: 150,
+              fit: BoxFit.contain,
+              errorBuilder: (c, e, s) => Icon(Icons.notifications_rounded, size: 80, color: _accentColor),
+            ),
             const SizedBox(height: 16),
             _buildPermissionItem('Notifications', Icons.notifications_rounded, _notificationGranted, _requestNotification),
             _buildPermissionItem('Storage Access', Icons.folder_rounded, _storageGranted, _requestStorage),
@@ -301,9 +320,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         hero: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Lottie.asset(
-              'assets/lottie/jsons/batteryEffecient.json',
-              width: 220, height: 220,
+            Image.asset(
+              'assets/lottie/gifs/Lowbattery.gif',
+              width: 200, height: 200,
+              fit: BoxFit.contain,
               errorBuilder: (c, e, s) => Icon(Icons.battery_charging_full_rounded, size: 80, color: _accentColor),
             ),
             const SizedBox(height: 24),
@@ -325,9 +345,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       OnboardingData(
         title: 'Zero Friction',
         subtitle: 'You\'re ready. Build your offline library without ever leaving your favorite apps.',
-        hero: Lottie.asset(
-          'assets/lottie/jsons/frictionFree.json',
+        hero: Image.asset(
+          'assets/lottie/gifs/friction_free.gif',
           width: 240, height: 240,
+          fit: BoxFit.contain,
           errorBuilder: (c, e, s) => Icon(Icons.rocket_launch_rounded, size: 80, color: _accentColor),
         ),
         isFinalPage: true,
@@ -340,7 +361,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       backgroundColor: context.colorBackground,
       body: Stack(
         children: [
-          // Dynamic Background
+          // Dynamic Background Gradient
           Positioned.fill(
             child: AnimatedContainer(
               duration: 800.ms,
@@ -357,9 +378,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
           ),
 
-          // Progress Indicator
+          // Progress Indicator / Top header
           Positioned(
-            top: MediaQuery.of(context).padding.top + 20,
+            top: MediaQuery.of(context).padding.top + 12,
             left: 32,
             right: 32,
             child: Row(
@@ -368,7 +389,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: context.colorTextTertiary.withValues(alpha: 0.1),
+                    color: context.colorTextTertiary.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -402,32 +423,38 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    page.hero
-                      .animate(key: ValueKey('hero_$index'))
-                      .fadeIn(duration: 600.ms)
-                      .scale(begin: const Offset(0.9, 0.9), curve: Curves.easeOutBack),
-                    
-                    const SizedBox(height: 50),
-                    
+                    const Spacer(flex: 3),
+                    SizedBox(
+                      height: 250,
+                      child: Center(
+                        child: page.hero
+                          .animate(key: ValueKey('hero_$index'))
+                          .fadeIn(duration: 600.ms)
+                          .scale(begin: const Offset(0.9, 0.9), curve: Curves.easeOutBack),
+                      ),
+                    ),
+                    const Spacer(flex: 2),
                     Text(
                       page.title,
                       textAlign: TextAlign.center,
-                      style: context.typographyH1.copyWith(fontSize: 28),
+                      style: context.typographyH1.copyWith(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: -0.5,
+                      ),
                     ).animate(key: ValueKey('title_$index')).fadeIn(delay: 200.ms).slideY(begin: 0.1),
-                    
                     const SizedBox(height: 16),
-                    
                     Text(
                       page.subtitle,
                       textAlign: TextAlign.center,
                       style: context.typographyBody.copyWith(
                         color: context.colorTextSecondary,
                         height: 1.6,
-                        fontSize: 15,
+                        fontSize: 14,
                       ),
                     ).animate(key: ValueKey('sub_$index')).fadeIn(delay: 400.ms).slideY(begin: 0.1),
+                    const Spacer(flex: 4),
                   ],
                 ),
               );
@@ -442,17 +469,20 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Pro Tip Carousel
+                // Pro Tip Carousel (only shown on the last page)
                 if (_currentPage == _pages.length - 1)
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 30),
+                    padding: const EdgeInsets.only(bottom: 24),
                     child: AnimatedSwitcher(
                       duration: 500.ms,
                       transitionBuilder: (Widget child, Animation<double> animation) {
-                        return FadeTransition(opacity: animation, child: SlideTransition(
-                          position: Tween<Offset>(begin: const Offset(0.0, 0.2), end: Offset.zero).animate(animation),
-                          child: child,
-                        ));
+                        return FadeTransition(
+                          opacity: animation,
+                          child: SlideTransition(
+                            position: Tween<Offset>(begin: const Offset(0.0, 0.2), end: Offset.zero).animate(animation),
+                            child: child,
+                          ),
+                        );
                       },
                       child: Container(
                         key: ValueKey<int>(_currentTip),
@@ -478,56 +508,69 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                   ),
 
+                // Page Indicator Dots
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: List.generate(_pages.length, (i) => 
-                        AnimatedContainer(
-                          duration: 300.ms,
-                          margin: const EdgeInsets.only(right: 8),
-                          height: 6,
-                          width: _currentPage == i ? 24 : 6,
-                          decoration: BoxDecoration(
-                            color: _currentPage == i ? currentColor : context.colorTextTertiary.withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(3),
-                          ),
-                        )
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(_pages.length, (i) => 
+                    AnimatedContainer(
+                      duration: 300.ms,
+                      margin: const EdgeInsets.only(right: 6),
+                      height: 6,
+                      width: _currentPage == i ? 18 : 6,
+                      decoration: BoxDecoration(
+                        color: _currentPage == i ? currentColor : context.colorTextTertiary.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(3),
                       ),
                     ),
-
-                    GestureDetector(
-                      onTap: _onNext,
-                      child: AnimatedContainer(
-                        duration: 300.ms,
-                        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                        decoration: BoxDecoration(
-                          color: currentColor,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(color: currentColor.withValues(alpha: 0.3), blurRadius: 15, offset: const Offset(0, 6))
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            Text(
-                              _currentPage == _pages.length - 1 ? 'Get Started' : 'Next',
-                              style: context.typographyH3.copyWith(color: context.colorBackground),
-                            ),
-                            if (_currentPage < _pages.length - 1) ...[
-                              const SizedBox(width: 8),
-                              Icon(Icons.arrow_forward_rounded, color: context.colorBackground, size: 18),
-                            ]
-                          ],
-                        ),
-                      ),
-                    ).animate(target: _currentPage == _pages.length - 1 ? 1 : 0)
-                     .shimmer(duration: 2.seconds, color: Colors.white24),
-                  ],
+                  ),
                 ),
+                const SizedBox(height: 24),
+
+                // Centered Pill Button
+                GestureDetector(
+                  onTap: _onNext,
+                  child: AnimatedContainer(
+                    duration: 300.ms,
+                    width: 200,
+                    height: 50,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: currentColor,
+                      borderRadius: BorderRadius.circular(999), // Fully rounded pill
+                      boxShadow: [
+                        BoxShadow(
+                          color: currentColor.withValues(alpha: 0.25),
+                          blurRadius: 16,
+                          offset: const Offset(0, 6),
+                        )
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          _currentPage == _pages.length - 1 ? 'Get Started' : 'Continue',
+                          style: context.typographyH3.copyWith(
+                            color: context.colorBackground,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(
+                          Icons.arrow_forward_rounded,
+                          color: context.colorBackground,
+                          size: 16,
+                        ),
+                      ],
+                    ),
+                  ),
+                ).animate(target: _currentPage == _pages.length - 1 ? 1 : 0)
+                 .shimmer(duration: 2.seconds, color: Colors.white24),
               ],
-            ).animate().fadeIn(delay: 800.ms),
-          ),
+            ),
+          ).animate().fadeIn(delay: 800.ms),
         ],
       ),
     );
@@ -550,69 +593,4 @@ class OnboardingData {
     this.isThemePage = false,
     this.isFinalPage = false,
   });
-}
-
-class _PermissionLottieCarousel extends StatefulWidget {
-  const _PermissionLottieCarousel();
-
-  @override
-  State<_PermissionLottieCarousel> createState() => _PermissionLottieCarouselState();
-}
-
-class _PermissionLottieCarouselState extends State<_PermissionLottieCarousel> {
-  int _currentIndex = 0;
-  Timer? _timer;
-  final List<String> _lotties = [
-    'assets/lottie/jsons/notification.json',
-    'assets/lottie/jsons/fileFolderPermission.json',
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
-      if (mounted) {
-        setState(() {
-          _currentIndex = (_currentIndex + 1) % _lotties.length;
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 160,
-      height: 160,
-      child: Stack(
-        alignment: Alignment.center,
-        children: List.generate(_lotties.length, (index) {
-          final isVisible = _currentIndex == index;
-          return AnimatedOpacity(
-            opacity: isVisible ? 1.0 : 0.0,
-            duration: const Duration(milliseconds: 600),
-            curve: Curves.easeInOut,
-            child: AnimatedScale(
-              scale: isVisible ? 1.0 : 0.8,
-              duration: const Duration(milliseconds: 600),
-              curve: Curves.easeOutBack,
-              child: Lottie.asset(
-                _lotties[index],
-                width: 160,
-                height: 160,
-                fit: BoxFit.contain,
-                errorBuilder: (c, e, s) => Icon(Icons.error_outline, size: 60, color: Colors.white24),
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-  }
 }
