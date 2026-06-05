@@ -33,7 +33,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   late List<OnboardingData> _pages;
 
-  Color get _accentColor => context.colorAccent;
+  Color get _accentColor => const Color(0xFF385144);
 
   @override
   void initState() {
@@ -68,75 +68,91 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     }
   }
 
-  Widget _buildThemeSwitcher() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildThemeCard('Light', ThemeMode.light),
-        const SizedBox(width: 12),
-        _buildThemeCard('System', ThemeMode.system),
-        const SizedBox(width: 12),
-        _buildThemeCard('Dark', ThemeMode.dark),
-      ],
-    );
-  }
-
-  Widget _buildThemeCard(String label, ThemeMode mode) {
+  Widget _buildThemeToggler() {
     final settings = ref.watch(settingsProvider);
-    final isSelected = settings.themeMode == (mode == ThemeMode.dark ? 'dark' : mode == ThemeMode.light ? 'light' : 'system');
-    final color = _accentColor;
-    final isDark = mode == ThemeMode.dark || (mode == ThemeMode.system && MediaQuery.platformBrightnessOf(context) == Brightness.dark);
+    final isDark = settings.themeMode == 'dark';
+    final accent = const Color(0xFF385144);
+    final bg = const Color(0xFFEDE8E3);
 
-    return GestureDetector(
-      onTap: () {
-        ref.read(settingsProvider.notifier).update(
-          settings.copyWith(themeMode: mode == ThemeMode.dark ? 'dark' : mode == ThemeMode.light ? 'light' : 'system')
-        );
-      },
-      child: AnimatedContainer(
-        duration: 400.ms,
-        width: 90,
-        height: 140,
-        decoration: BoxDecoration(
-          color: isSelected ? color : (isDark ? context.colorElevated : Colors.white),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? color : color.withValues(alpha: 0.1),
-            width: 2,
-          ),
-          boxShadow: isSelected ? [
-            BoxShadow(color: color.withValues(alpha: 0.3), blurRadius: 15, offset: const Offset(0, 8))
-          ] : [],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Miniature Dashboard Preview
-            Container(
-              width: 46,
-              height: 64,
+    return Container(
+      width: 180,
+      height: 44,
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Stack(
+        children: [
+          // Sliding Capsule
+          AnimatedAlign(
+            duration: 250.ms,
+            curve: Curves.easeInOut,
+            alignment: isDark ? Alignment.centerRight : Alignment.centerLeft,
+            child: Container(
+              width: 90,
+              height: 44,
               decoration: BoxDecoration(
-                color: isSelected ? context.colorBackground.withValues(alpha: 0.2) : color.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Stack(
-                children: [
-                  Positioned(top: 8, left: 8, right: 8, child: Container(height: 6, decoration: BoxDecoration(color: isSelected ? context.colorBackground : color, borderRadius: BorderRadius.circular(3)))),
-                  Positioned(top: 20, left: 8, width: 20, child: Container(height: 4, decoration: BoxDecoration(color: (isSelected ? context.colorBackground : color).withValues(alpha: 0.3), borderRadius: BorderRadius.circular(2)))),
-                  Positioned(bottom: 8, right: 8, child: Container(width: 14, height: 14, decoration: BoxDecoration(color: isSelected ? context.colorBackground : color, shape: BoxShape.circle))),
+                color: accent,
+                borderRadius: BorderRadius.circular(999),
+                boxShadow: [
+                  BoxShadow(
+                    color: accent.withValues(alpha: 0.2),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  )
                 ],
               ),
             ),
-            const SizedBox(height: 12),
-            Text(
-              label,
-              style: context.typographyH3.copyWith(
-                color: isSelected ? context.colorBackground : (isDark ? Colors.white70 : color),
-                fontSize: 12,
+          ),
+          
+          // Labels
+          Row(
+            children: [
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    ref.read(settingsProvider.notifier).update(
+                      settings.copyWith(themeMode: 'light')
+                    );
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: Center(
+                    child: Text(
+                      'Light',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? accent.withValues(alpha: 0.6) : const Color(0xFFF8F5F2),
+                      ),
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ],
-        ),
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    ref.read(settingsProvider.notifier).update(
+                      settings.copyWith(themeMode: 'dark')
+                    );
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: Center(
+                    child: Text(
+                      'Dark',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? const Color(0xFFF8F5F2) : accent.withValues(alpha: 0.6),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -185,51 +201,113 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     _checkPermissions();
   }
 
-  Widget _buildPermissionItem(String title, IconData icon, bool isGranted, VoidCallback onTap) {
-    final color = _accentColor;
-    return AnimatedContainer(
-      duration: 300.ms,
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: isGranted ? color.withValues(alpha: 0.1) : context.colorTextTertiary.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isGranted ? color.withValues(alpha: 0.3) : Colors.transparent,
+  Widget _buildCompactPermissionItem(String label, IconData icon, bool isGranted, VoidCallback onTap) {
+    final accent = const Color(0xFF385144);
+    final lightBg = isGranted ? accent.withValues(alpha: 0.1) : const Color(0xFFEDE8E3);
+    
+    final item = GestureDetector(
+      onTap: isGranted ? null : onTap,
+      child: AnimatedContainer(
+        duration: 300.ms,
+        height: 44,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+          color: lightBg,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isGranted ? accent.withValues(alpha: 0.3) : Colors.transparent,
+            width: 1.2,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              color: isGranted ? accent : accent.withValues(alpha: 0.6),
+              size: 16,
+            ),
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: isGranted ? accent : accent.withValues(alpha: 0.8),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (isGranted) ...[
+              const SizedBox(width: 4),
+              Icon(Icons.check_circle_rounded, color: accent, size: 14),
+            ],
+          ],
         ),
       ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: isGranted ? color : context.colorTextTertiary.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: isGranted ? Colors.white : context.colorTextSecondary, size: 20),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Text(
-              title,
-              style: context.typographyH3.copyWith(fontSize: 15),
-            ),
-          ),
-          if (isGranted)
-            Icon(Icons.check_circle_rounded, color: color, size: 24).animate().scale(duration: 400.ms, curve: Curves.easeOutBack)
-          else
-            TextButton(
-              onPressed: onTap,
-              style: TextButton.styleFrom(
-                backgroundColor: color.withValues(alpha: 0.1),
-                foregroundColor: color,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-              child: const Text('Grant'),
-            ),
-        ],
-      ),
     );
+
+    if (isGranted) {
+      return Expanded(child: item);
+    } else {
+      return Expanded(
+        child: item
+            .animate(onPlay: (controller) => controller.repeat())
+            .shimmer(duration: 2.seconds, color: Colors.white.withValues(alpha: 0.45)),
+      );
+    }
+  }
+
+  Widget _buildBatteryButton() {
+    final accent = const Color(0xFF385144);
+    if (_batteryIgnored) {
+      return Container(
+        height: 44,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        decoration: BoxDecoration(
+          color: accent.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: accent.withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.check_circle_rounded, color: accent, size: 16),
+            const SizedBox(width: 8),
+            Text(
+              'Optimization Disabled',
+              style: TextStyle(color: accent, fontWeight: FontWeight.bold, fontSize: 13),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return GestureDetector(
+      onTap: _requestBatteryOptimization,
+      child: Container(
+        height: 44,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        decoration: BoxDecoration(
+          color: const Color(0xFFEDE8E3),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.battery_charging_full_rounded, color: accent, size: 16),
+            const SizedBox(width: 8),
+            Text(
+              'Open Battery Settings',
+              style: TextStyle(color: accent, fontWeight: FontWeight.bold, fontSize: 13),
+            ),
+          ],
+        ),
+      ),
+    ).animate(onPlay: (controller) => controller.repeat())
+     .shimmer(duration: 2.seconds, color: Colors.white.withValues(alpha: 0.45));
   }
 
   @override
@@ -240,7 +318,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         subtitle: 'Stop the copy-paste fatigue. Share any link directly to Downloda and keep browsing. We handle the rest in the background, silently.',
         hero: Image.asset(
           'assets/lottie/gifs/Download.gif',
-          width: 240, height: 240,
+          width: 300, height: 300,
           fit: BoxFit.contain,
           errorBuilder: (c, e, s) => Icon(Icons.share_rounded, size: 80, color: _accentColor),
         ),
@@ -248,106 +326,52 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       OnboardingData(
         title: 'Choose Your Style',
         subtitle: 'Pick a look that suits your eyes. Your preference will be saved across sessions.',
-        hero: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset(
-              'assets/lottie/gifs/theme_toggle.gif',
-              width: 140, height: 140,
-              fit: BoxFit.contain,
-              errorBuilder: (c, e, s) => Icon(Icons.palette_rounded, size: 60, color: _accentColor),
-            ),
-            const SizedBox(height: 20),
-            _buildThemeSwitcher(),
-          ],
+        hero: Image.asset(
+          'assets/lottie/gifs/theme_toggle.gif',
+          width: 240, height: 240,
+          fit: BoxFit.contain,
+          errorBuilder: (c, e, s) => Icon(Icons.palette_rounded, size: 60, color: _accentColor),
         ),
         isThemePage: true,
       ),
       OnboardingData(
         title: 'Privacy by Default',
         subtitle: 'No data ever leaves your device for metadata extraction. Your downloads and history stay 100% on your device, encrypted by your OS.',
-        hero: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset(
-              'assets/lottie/gifs/secure_privacy.gif',
-              width: 200, height: 200,
-              fit: BoxFit.contain,
-              errorBuilder: (c, e, s) => Icon(Icons.security_rounded, size: 80, color: _accentColor),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: _accentColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: _accentColor.withValues(alpha: 0.3)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.verified_user_rounded, color: _accentColor, size: 16),
-                  const SizedBox(width: 6),
-                  Text('Local-Only Verified', style: TextStyle(color: _accentColor, fontWeight: FontWeight.bold, fontSize: 12)),
-                ],
-              ),
-            ),
-          ],
+        hero: Image.asset(
+          'assets/lottie/gifs/secure_privacy.gif',
+          width: 270, height: 270,
+          fit: BoxFit.contain,
+          errorBuilder: (c, e, s) => Icon(Icons.security_rounded, size: 80, color: _accentColor),
         ),
       ),
       OnboardingData(
         title: 'Permissions & Access',
         subtitle: 'To provide a seamless experience, we need a few permissions to operate in the background and save your files.',
-        hero: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset(
-              'assets/lottie/gifs/notifications.gif',
-              width: 150, height: 150,
-              fit: BoxFit.contain,
-              errorBuilder: (c, e, s) => Icon(Icons.notifications_rounded, size: 80, color: _accentColor),
-            ),
-            const SizedBox(height: 16),
-            _buildPermissionItem('Notifications', Icons.notifications_rounded, _notificationGranted, _requestNotification),
-            _buildPermissionItem('Storage Access', Icons.folder_rounded, _storageGranted, _requestStorage),
-          ],
+        hero: Image.asset(
+          'assets/lottie/gifs/notifications.gif',
+          width: 240, height: 240,
+          fit: BoxFit.contain,
+          errorBuilder: (c, e, s) => Icon(Icons.notifications_rounded, size: 80, color: _accentColor),
         ),
         isPermissionPage: true,
       ),
       OnboardingData(
         title: 'Background Mastery',
         subtitle: 'To ensure large downloads aren\'t killed by the system, we strongly recommend disabling battery optimization for Downloda.',
-        hero: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset(
-              'assets/lottie/gifs/Lowbattery.gif',
-              width: 200, height: 200,
-              fit: BoxFit.contain,
-              errorBuilder: (c, e, s) => Icon(Icons.battery_charging_full_rounded, size: 80, color: _accentColor),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: _batteryIgnored ? null : _requestBatteryOptimization,
-              icon: Icon(_batteryIgnored ? Icons.check_circle_outline : Icons.battery_charging_full_rounded),
-              label: Text(_batteryIgnored ? 'Optimization Disabled' : 'Open Battery Settings'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _batteryIgnored ? context.colorBackground : _accentColor,
-                foregroundColor: _batteryIgnored ? _accentColor : context.colorBackground,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                elevation: 0,
-              ),
-            ),
-          ],
+        hero: Image.asset(
+          'assets/lottie/gifs/Lowbattery.gif',
+          width: 260, height: 260,
+          fit: BoxFit.contain,
+          errorBuilder: (c, e, s) => Icon(Icons.battery_charging_full_rounded, size: 80, color: _accentColor),
         ),
+        isBatteryPage: true,
       ),
       OnboardingData(
         title: 'Zero Friction',
         subtitle: 'You\'re ready. Build your offline library without ever leaving your favorite apps.',
         hero: Image.asset(
           'assets/lottie/gifs/friction_free.gif',
-          width: 240, height: 240,
+          width: 300, height: 300,
           fit: BoxFit.contain,
           errorBuilder: (c, e, s) => Icon(Icons.rocket_launch_rounded, size: 80, color: _accentColor),
         ),
@@ -357,221 +381,246 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
     final currentColor = _accentColor;
 
-    return Scaffold(
-      backgroundColor: context.colorBackground,
-      body: Stack(
-        children: [
-          // Dynamic Background Gradient
-          Positioned.fill(
-            child: AnimatedContainer(
-              duration: 800.ms,
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  center: Alignment.topCenter,
-                  radius: 1.2,
-                  colors: [
-                    currentColor.withValues(alpha: 0.15),
-                    context.colorBackground,
-                  ],
-                ),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarColor: Color(0xFFF8F5F2),
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF8F5F2),
+        body: Stack(
+          children: [
+            // Progress Indicator / Top header
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 12,
+              left: 32,
+              right: 32,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF385144).withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      'Step ${_currentPage + 1} of ${_pages.length}',
+                      style: context.typographyBody.copyWith(
+                        color: const Color(0xFF5C7A6B),
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ).animate(key: ValueKey('step_$_currentPage')).fadeIn().slideX(),
+                  
+                  if (_currentPage < _pages.length - 1)
+                    TextButton(
+                      onPressed: () {
+                        _pageController.animateToPage(_pages.length - 1, duration: 600.ms, curve: Curves.easeOutCubic);
+                      },
+                      style: TextButton.styleFrom(foregroundColor: const Color(0xFF5C7A6B)),
+                      child: const Text('Skip'),
+                    )
+                ],
               ),
             ),
-          ),
-
-          // Progress Indicator / Top header
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 12,
-            left: 32,
-            right: 32,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: context.colorTextTertiary.withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    'Step ${_currentPage + 1} of ${_pages.length}',
-                    style: context.typographyBody.copyWith(
-                      color: context.colorTextSecondary,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ).animate(key: ValueKey('step_$_currentPage')).fadeIn().slideX(),
-                
-                if (_currentPage < _pages.length - 1)
-                  TextButton(
-                    onPressed: () {
-                      _pageController.animateToPage(_pages.length - 1, duration: 600.ms, curve: Curves.easeOutCubic);
-                    },
-                    style: TextButton.styleFrom(foregroundColor: context.colorTextSecondary),
-                    child: const Text('Skip'),
-                  )
-              ],
-            ),
-          ),
-
-          PageView.builder(
-            controller: _pageController,
-            onPageChanged: (index) => setState(() => _currentPage = index),
-            itemCount: _pages.length,
-            itemBuilder: (context, index) {
-              final page = _pages[index];
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40),
-                child: Column(
-                  children: [
-                    const Spacer(flex: 3),
-                    SizedBox(
-                      height: 250,
-                      child: Center(
-                        child: page.hero
-                          .animate(key: ValueKey('hero_$index'))
-                          .fadeIn(duration: 600.ms)
-                          .scale(begin: const Offset(0.9, 0.9), curve: Curves.easeOutBack),
-                      ),
-                    ),
-                    const Spacer(flex: 2),
-                    Text(
-                      page.title,
-                      textAlign: TextAlign.center,
-                      style: context.typographyH1.copyWith(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: -0.5,
-                      ),
-                    ).animate(key: ValueKey('title_$index')).fadeIn(delay: 200.ms).slideY(begin: 0.1),
-                    const SizedBox(height: 16),
-                    Text(
-                      page.subtitle,
-                      textAlign: TextAlign.center,
-                      style: context.typographyBody.copyWith(
-                        color: context.colorTextSecondary,
-                        height: 1.6,
-                        fontSize: 14,
-                      ),
-                    ).animate(key: ValueKey('sub_$index')).fadeIn(delay: 400.ms).slideY(begin: 0.1),
-                    const Spacer(flex: 4),
-                  ],
-                ),
-              );
-            },
-          ),
-
-          // Bottom Controls & Pro Tips
-          Positioned(
-            bottom: 40,
-            left: 32,
-            right: 32,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Pro Tip Carousel (only shown on the last page)
-                if (_currentPage == _pages.length - 1)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 24),
-                    child: AnimatedSwitcher(
-                      duration: 500.ms,
-                      transitionBuilder: (Widget child, Animation<double> animation) {
-                        return FadeTransition(
-                          opacity: animation,
-                          child: SlideTransition(
-                            position: Tween<Offset>(begin: const Offset(0.0, 0.2), end: Offset.zero).animate(animation),
-                            child: child,
-                          ),
-                        );
-                      },
-                      child: Container(
-                        key: ValueKey<int>(_currentTip),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                          color: currentColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: currentColor.withValues(alpha: 0.2)),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(Icons.lightbulb_outline_rounded, color: currentColor, size: 20),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                _proTips[_currentTip],
-                                style: context.typographyBody.copyWith(color: context.colorTextSecondary, fontSize: 13),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-
-                // Page Indicator Dots
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(_pages.length, (i) => 
-                    AnimatedContainer(
-                      duration: 300.ms,
-                      margin: const EdgeInsets.only(right: 6),
-                      height: 6,
-                      width: _currentPage == i ? 18 : 6,
-                      decoration: BoxDecoration(
-                        color: _currentPage == i ? currentColor : context.colorTextTertiary.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(3),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // Centered Pill Button
-                GestureDetector(
-                  onTap: _onNext,
-                  child: AnimatedContainer(
-                    duration: 300.ms,
-                    width: 200,
-                    height: 50,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: currentColor,
-                      borderRadius: BorderRadius.circular(999), // Fully rounded pill
-                      boxShadow: [
-                        BoxShadow(
-                          color: currentColor.withValues(alpha: 0.25),
-                          blurRadius: 16,
-                          offset: const Offset(0, 6),
-                        )
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
+  
+            PageView.builder(
+              controller: _pageController,
+              onPageChanged: (index) => setState(() => _currentPage = index),
+              itemCount: _pages.length,
+              itemBuilder: (context, index) {
+                final page = _pages[index];
+                final screenHeight = MediaQuery.of(context).size.height;
+                final topPadding = index == 0 ? screenHeight * 0.05 : screenHeight * 0.12;
+  
+                return SingleChildScrollView(
+                  physics: const ClampingScrollPhysics(),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 40),
+                    child: Column(
                       children: [
-                        Text(
-                          _currentPage == _pages.length - 1 ? 'Get Started' : 'Continue',
-                          style: context.typographyH3.copyWith(
-                            color: context.colorBackground,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15,
+                        SizedBox(height: topPadding),
+                        SizedBox(
+                          height: 310,
+                          child: Center(
+                            child: page.hero
+                              .animate(key: ValueKey('hero_$index'))
+                              .fadeIn(duration: 600.ms)
+                              .scale(begin: const Offset(0.9, 0.9), curve: Curves.easeOutBack),
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Icon(
-                          Icons.arrow_forward_rounded,
-                          color: context.colorBackground,
-                          size: 16,
-                        ),
+                        const SizedBox(height: 24),
+                        Text(
+                          page.title,
+                          textAlign: TextAlign.center,
+                          style: context.typographyH1.copyWith(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: -0.5,
+                            color: const Color(0xFF385144),
+                          ),
+                        ).animate(key: ValueKey('title_$index')).fadeIn(delay: 200.ms).slideY(begin: 0.1),
+                        const SizedBox(height: 16),
+                        Text(
+                          page.subtitle,
+                          textAlign: TextAlign.center,
+                          style: context.typographyBody.copyWith(
+                            color: const Color(0xFF5C7A6B),
+                            height: 1.6,
+                            fontSize: 14,
+                          ),
+                        ).animate(key: ValueKey('sub_$index')).fadeIn(delay: 400.ms).slideY(begin: 0.1),
+                        
+                        // Interactive controls positioned below description text:
+                        if (page.isThemePage) ...[
+                          const SizedBox(height: 24),
+                          _buildThemeToggler()
+                            .animate(key: ValueKey('theme_toggle_$index'))
+                            .fadeIn(delay: 500.ms)
+                            .slideY(begin: 0.2),
+                        ] else if (page.isPermissionPage) ...[
+                          const SizedBox(height: 24),
+                          Row(
+                            children: [
+                              _buildCompactPermissionItem('Notifications', Icons.notifications_rounded, _notificationGranted, _requestNotification),
+                              const SizedBox(width: 12),
+                              _buildCompactPermissionItem('Storage Access', Icons.folder_rounded, _storageGranted, _requestStorage),
+                            ],
+                          ).animate(key: ValueKey('permission_row_$index'))
+                           .fadeIn(delay: 500.ms)
+                           .slideY(begin: 0.2),
+                        ] else if (page.isBatteryPage) ...[
+                          const SizedBox(height: 24),
+                          _buildBatteryButton()
+                            .animate(key: ValueKey('battery_button_$index'))
+                            .fadeIn(delay: 500.ms)
+                            .slideY(begin: 0.2),
+                        ],
+                        
+                        const SizedBox(height: 160), // Space for bottom controls
                       ],
                     ),
                   ),
-                ).animate(target: _currentPage == _pages.length - 1 ? 1 : 0)
-                 .shimmer(duration: 2.seconds, color: Colors.white24),
-              ],
+                );
+              },
             ),
-          ).animate().fadeIn(delay: 800.ms),
-        ],
+  
+            // Bottom Controls & Pro Tips
+            Positioned(
+              bottom: 40,
+              left: 32,
+              right: 32,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Pro Tip Carousel (only shown on the last page)
+                  if (_currentPage == _pages.length - 1)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 24),
+                      child: AnimatedSwitcher(
+                        duration: 500.ms,
+                        transitionBuilder: (Widget child, Animation<double> animation) {
+                          return FadeTransition(
+                            opacity: animation,
+                            child: SlideTransition(
+                              position: Tween<Offset>(begin: const Offset(0.0, 0.2), end: Offset.zero).animate(animation),
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: Container(
+                          key: ValueKey<int>(_currentTip),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            color: currentColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: currentColor.withValues(alpha: 0.2)),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.lightbulb_outline_rounded, color: currentColor, size: 20),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  _proTips[_currentTip],
+                                  style: context.typographyBody.copyWith(color: const Color(0xFF5C7A6B), fontSize: 13),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+  
+                  // Page Indicator Dots
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(_pages.length, (i) => 
+                      AnimatedContainer(
+                        duration: 300.ms,
+                        margin: const EdgeInsets.only(right: 6),
+                        height: 6,
+                        width: _currentPage == i ? 18 : 6,
+                        decoration: BoxDecoration(
+                          color: _currentPage == i ? currentColor : const Color(0xFF5C7A6B).withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+  
+                  // Centered Pill Button with Shiny Shimmer
+                  GestureDetector(
+                    onTap: _onNext,
+                    child: Container(
+                      width: 200,
+                      height: 50,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: currentColor,
+                        borderRadius: BorderRadius.circular(999), // Fully rounded pill
+                        boxShadow: [
+                          BoxShadow(
+                            color: currentColor.withValues(alpha: 0.25),
+                            blurRadius: 16,
+                            offset: const Offset(0, 6),
+                          )
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _currentPage == _pages.length - 1 ? 'Get Started' : 'Continue',
+                            style: context.typographyH3.copyWith(
+                              color: const Color(0xFFF8F5F2),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(
+                            Icons.arrow_forward_rounded,
+                            color: Color(0xFFF8F5F2),
+                            size: 16,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ).animate(onPlay: (controller) => controller.repeat())
+                   .shimmer(duration: 2.seconds, color: Colors.white.withValues(alpha: 0.45)),
+                ],
+              ),
+            ).animate().fadeIn(delay: 800.ms),
+          ],
+        ),
       ),
     );
   }
@@ -583,6 +632,7 @@ class OnboardingData {
   final Widget hero;
   final bool isPermissionPage;
   final bool isThemePage;
+  final bool isBatteryPage;
   final bool isFinalPage;
 
   OnboardingData({
@@ -591,6 +641,7 @@ class OnboardingData {
     required this.hero,
     this.isPermissionPage = false,
     this.isThemePage = false,
+    this.isBatteryPage = false,
     this.isFinalPage = false,
   });
 }
