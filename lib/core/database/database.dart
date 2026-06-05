@@ -82,6 +82,8 @@ class AppDatabase extends _$AppDatabase {
   Future<bool> updateDownload(DownloadItemsCompanion item) => update(downloadItems).replace(item);
   Future<int> deleteDownload(String id) => (delete(downloadItems)..where((t) => t.id.equals(id))).go();
   Future<DownloadItemData?> getDownloadById(String id) => (select(downloadItems)..where((t) => t.id.equals(id))).getSingleOrNull();
+  Future<DownloadItemData?> getDownloadByUrl(String url) => (select(downloadItems)..where((t) => t.url.equals(url))).getSingleOrNull();
+  Future<DownloadItemData?> getDownloadByTitle(String title) => (select(downloadItems)..where((t) => t.title.equals(title))).getSingleOrNull();
 }
 
 LazyDatabase _openConnection() {

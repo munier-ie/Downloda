@@ -65,17 +65,17 @@ class AppSettings {
     bool? batterySaver,
     int? seekDuration,
     String? themeMode,
-  })  : defaultRes = defaultRes ?? '1080p',
+  })  : defaultRes = defaultRes ?? '720p',
         defaultFormat = defaultFormat ?? 'mp4',
         autoDownload = autoDownload ?? true,
         maxSimultaneous = maxSimultaneous ?? 3,
         persistentNotifs = persistentNotifs ?? true,
         compactMode = compactMode ?? false,
-        vibration = vibration ?? false,
+        vibration = vibration ?? true,
         wifiOnly = wifiOnly ?? false,
         batterySaver = batterySaver ?? false,
         seekDuration = seekDuration ?? 5,
-        themeMode = themeMode ?? 'dark';
+        themeMode = themeMode ?? 'light';
 
   AppSettings copyWith({
     String? defaultRes,
@@ -111,17 +111,17 @@ class SettingsNotifier extends Notifier<AppSettings> {
   AppSettings build() {
     final prefs = ref.watch(sharedPrefsProvider);
     return AppSettings(
-      defaultRes: prefs.getString('defaultRes') ?? '1080p',
+      defaultRes: prefs.getString('defaultRes') ?? '720p',
       defaultFormat: prefs.getString('defaultFormat') ?? 'mp4',
       autoDownload: prefs.getBool('autoDownload') ?? true,
       maxSimultaneous: prefs.getInt('maxSimultaneous') ?? 3,
       persistentNotifs: prefs.getBool('persistentNotifs') ?? true,
       compactMode: prefs.getBool('compactMode') ?? false,
-      vibration: prefs.getBool('vibration') ?? false,
+      vibration: prefs.getBool('vibration') ?? true,
       wifiOnly: prefs.getBool('wifiOnly') ?? false,
       batterySaver: prefs.getBool('batterySaver') ?? false,
       seekDuration: prefs.getInt('seekDuration') ?? 5,
-      themeMode: prefs.getString('themeMode') ?? 'dark',
+      themeMode: prefs.getString('themeMode') ?? 'light',
     );
   }
 

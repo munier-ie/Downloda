@@ -57,7 +57,7 @@ class DownloadService {
 
   Future<bool> _isVibrationEnabled() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool('vibration') ?? false;
+    return prefs.getBool('vibration') ?? true;
   }
 
   /// Returns true if we're on a valid network for downloading.
@@ -160,6 +160,40 @@ class DownloadService {
     final cleanUrl = _extractUrl(url);
     final platform = _detectPlatform(cleanUrl);
 
+    // Duplicate Prevention Check
+    final existing = await db.getDownloadByUrl(cleanUrl);
+    if (existing != null) {
+      if (existing.status == DownloadStatus.completed) {
+        if (existing.filePath != null && await File(existing.filePath!).exists()) {
+          debugPrint('[DownloadService] Duplicate download skipped: already completed. URL: $cleanUrl');
+          await NotificationService().showCompletionNotification(
+            id: cleanUrl.hashCode & 0x7fffffff,
+            title: 'Already Downloaded',
+            body: '${existing.title} has already been downloaded.',
+            payload: existing.id,
+          );
+          return;
+        } else {
+          // User deleted the file on disk. Delete database record to allow redownload.
+          debugPrint('[DownloadService] File deleted on disk. Re-enabling download for URL: $cleanUrl');
+          await db.deleteDownload(existing.id);
+        }
+      } else if (existing.status == DownloadStatus.failed) {
+        // Delete the failed record to avoid cluttering history
+        debugPrint('[DownloadService] Deleting old failed download record for URL: $cleanUrl');
+        await db.deleteDownload(existing.id);
+      } else {
+        debugPrint('[DownloadService] Duplicate download skipped: active or paused. URL: $cleanUrl');
+        await NotificationService().showCompletionNotification(
+          id: cleanUrl.hashCode & 0x7fffffff,
+          title: 'Download Already Active',
+          body: '${existing.title} is already active or in progress.',
+          payload: existing.id,
+        );
+        return;
+      }
+    }
+
     // If it's a YouTube playlist URL (shared via share-download / external intent):
     if (platform == MediaPlatform.youtube &&
         (cleanUrl.contains('youtube.com') || cleanUrl.contains('youtu.be')) &&
@@ -172,8 +206,8 @@ class DownloadService {
 
         // Fetch user default settings from preferences
         final prefs = await SharedPreferences.getInstance();
-        final defaultRes = prefs.getString('defaultRes') ?? '1080p';
-        final useRes = defaultRes == 'Always Ask' ? '1080p' : defaultRes;
+        final defaultRes = prefs.getString('defaultRes') ?? '720p';
+        final useRes = defaultRes == 'Always Ask' ? '720p' : defaultRes;
         final useAudioOnly = prefs.getBool('audioOnly') ?? false;
 
         // Automatically queue all videos in the playlist using user settings
@@ -195,7 +229,7 @@ class DownloadService {
 
     // Fetch user default setting
     final prefs = await SharedPreferences.getInstance();
-    final settingsRes = prefs.getString('defaultRes') ?? '1080p';
+    final settingsRes = prefs.getString('defaultRes') ?? '720p';
     final useRes = preferredRes ?? settingsRes;
 
     // Check if resolution is Always Ask and download was requested from share intent
@@ -605,7 +639,7 @@ class DownloadService {
 
     // Load saved settings
     final prefs = await SharedPreferences.getInstance();
-    final settingsRes = prefs.getString('defaultRes') ?? '1080p';
+    final settingsRes = prefs.getString('defaultRes') ?? '720p';
     final settingsAudio = prefs.getBool('audioOnly') ?? false;
     final batterySaver = prefs.getBool('batterySaver') ?? false;
     final useAudioOnly = audioOnly ?? settingsAudio;
@@ -653,6 +687,9 @@ class DownloadService {
         final manifest = await yt.videos.streamsClient.getManifest(video.id);
         videoTitle = video.title;
         thumb = video.thumbnails.mediumResUrl;
+
+        // Check for duplicate title
+        if (await _checkDuplicateTitle(id, videoTitle, cleanUrl, notifId)) return;
 
         // ── 2. Pick stream ──
         if (useAudioOnly) {
@@ -717,11 +754,17 @@ class DownloadService {
           thumb = thumbnailUrl;
           resolvedFormat = 'mp4';
           resolvedResolution = useRes;
+
+          // Check for duplicate title
+          if (await _checkDuplicateTitle(id, videoTitle, cleanUrl, notifId)) return;
         } else {
           final social = SocialDownloadService();
           final info = await social.fetchInfo(cleanUrl);
           videoTitle = info.title;
           thumb = info.thumbnailUrl;
+
+          // Check for duplicate title
+          if (await _checkDuplicateTitle(id, videoTitle, cleanUrl, notifId)) return;
 
           // Parse requested target height (0 = no numeric preference = use highest)
           final targetHeight = useRes == 'Always Ask'
@@ -881,17 +924,23 @@ class DownloadService {
 
         downloadedBytes = videoDownloaded + audioDownloaded;
       } else {
+        final tempPath = '$savePath.temp';
+        final tempFile = File(tempPath);
         final file = File(savePath);
         int startByte = 0;
-        if (await file.exists()) {
+        if (await tempFile.exists()) {
+          startByte = await tempFile.length();
+          debugPrint('[DownloadService] Resuming temp file from byte $startByte');
+        } else if (await file.exists()) {
           startByte = await file.length();
-          debugPrint('[DownloadService] Resuming from byte $startByte');
+          debugPrint('[DownloadService] Resuming existing file from byte $startByte');
+          await file.rename(tempPath);
         }
 
         downloadedBytes = await _downloadStreamChunked(
           id: id,
           url: streamUrl,
-          tempPath: savePath,
+          tempPath: tempPath,
           startByte: startByte,
           totalStreamBytes: 0,
           overallProgressStart: 0,
@@ -902,7 +951,9 @@ class DownloadService {
           batterySaver: batterySaver,
         );
 
-        if (await file.exists()) {
+        if (await tempFile.exists()) {
+          fullSize = await tempFile.length();
+        } else if (await file.exists()) {
           fullSize = await file.length();
         }
       }
@@ -944,6 +995,8 @@ class DownloadService {
           if (await audioTempFile.exists()) await audioTempFile.delete();
           final file = File(savePath);
           if (await file.exists()) await file.delete();
+          final tempFile = File('$savePath.temp');
+          if (await tempFile.exists()) await tempFile.delete();
           await NotificationService().cancel(notifId);
         }
       } else {
@@ -1035,21 +1088,22 @@ class DownloadService {
           final dir = Directory(p.dirname(savePath));
           final baseName = p.basenameWithoutExtension(savePath);
           final audioOutputPath = p.join(dir.path, '$baseName.mp3');
+          final tempPath = '$savePath.temp';
 
           final session = await FFmpegKit.execute(
-            '-y -i "$savePath" -vn -acodec libmp3lame -q:a 2 "$audioOutputPath"',
+            '-y -i "$tempPath" -vn -acodec libmp3lame -q:a 2 "$audioOutputPath"',
           );
 
           final rc = await session.getReturnCode();
 
           if (ReturnCode.isSuccess(rc)) {
             try {
-              final rawFile = File(savePath);
+              final rawFile = File(tempPath);
               if (await rawFile.exists()) {
                 await rawFile.delete();
               }
             } catch (e) {
-              debugPrint('[DownloadService] Failed to delete raw video: $e');
+              debugPrint('[DownloadService] Failed to delete raw temp video: $e');
             }
 
             final outputFile = File(audioOutputPath);
@@ -1084,6 +1138,11 @@ class DownloadService {
             throw Exception('Audio extraction failed');
           }
         } else {
+          final tempPath = '$savePath.temp';
+          final tempFile = File(tempPath);
+          if (await tempFile.exists()) {
+            await tempFile.rename(savePath);
+          }
           final file = File(savePath);
           if (await file.exists()) {
             item.fileSizeMb = (await file.length()) / (1024 * 1024);
@@ -1156,6 +1215,14 @@ class DownloadService {
                 await file.delete();
               } catch (e) {
                 debugPrint('[DownloadService] Failed to delete cancelled file: $e');
+              }
+            }
+            final tempFile = File('${record.filePath}.temp');
+            if (await tempFile.exists()) {
+              try {
+                await tempFile.delete();
+              } catch (e) {
+                debugPrint('[DownloadService] Failed to delete cancelled temp file: $e');
               }
             }
             final videoTempFile = File('${record.filePath}.temp_v');
@@ -1431,6 +1498,88 @@ class DownloadService {
     } catch (e, st) {
       debugPrint('[DownloadService] Error syncing local downloads: $e\n$st');
     }
+  }
+
+  Future<String?> _findExistingFileOnDisk(String videoTitle) async {
+    try {
+      final dir = Directory('/storage/emulated/0/Download/Downloda');
+      if (!await dir.exists()) return null;
+      
+      final safeTitle = videoTitle.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_');
+      final targetPattern = '_$safeTitle.';
+      final targetPatternLower = targetPattern.toLowerCase();
+      
+      final files = await dir.list().toList();
+      for (final entity in files) {
+        if (entity is File) {
+          final name = p.basename(entity.path);
+          if (name.toLowerCase().contains(targetPatternLower)) {
+            return entity.path;
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('[DownloadService] Error checking disk files: $e');
+    }
+    return null;
+  }
+
+  Future<bool> _checkDuplicateTitle(String id, String videoTitle, String cleanUrl, int notifId) async {
+    if (videoTitle.isEmpty) return false;
+    
+    // 1. Check database first
+    final duplicate = await db.getDownloadByTitle(videoTitle);
+    if (duplicate != null && duplicate.id != id) {
+      if (duplicate.status == DownloadStatus.completed) {
+        if (duplicate.filePath != null && await File(duplicate.filePath!).exists()) {
+          debugPrint('[DownloadService] Duplicate download skipped: matching title "$videoTitle". URL: $cleanUrl');
+          // Clean up the current download
+          await db.deleteDownload(id);
+          await NotificationService().showCompletionNotification(
+            id: videoTitle.hashCode & 0x7fffffff,
+            title: 'Already Downloaded',
+            body: 'Video "$videoTitle" has already been downloaded.',
+            payload: duplicate.id,
+          );
+          return true;
+        } else {
+          // File was deleted from disk. Remove duplicate db entry to allow redownload.
+          debugPrint('[DownloadService] Duplicate completed file deleted from disk. Deleting record for title "$videoTitle".');
+          await db.deleteDownload(duplicate.id);
+        }
+      } else if (duplicate.status == DownloadStatus.failed) {
+        // Old failed record. Delete it.
+        debugPrint('[DownloadService] Deleting old failed duplicate record for title "$videoTitle".');
+        await db.deleteDownload(duplicate.id);
+      } else {
+        // Active/paused/queued/preparing
+        debugPrint('[DownloadService] Duplicate download skipped: active download matching title "$videoTitle". URL: $cleanUrl');
+        await db.deleteDownload(id);
+        await NotificationService().showCompletionNotification(
+          id: videoTitle.hashCode & 0x7fffffff,
+          title: 'Download Already Active',
+          body: 'A download for "$videoTitle" is already active.',
+          payload: duplicate.id,
+        );
+        return true;
+      }
+    }
+
+    // 2. Check disk directory directly (Mitigation for reinstall/database wipe)
+    final existingFilePath = await _findExistingFileOnDisk(videoTitle);
+    if (existingFilePath != null) {
+      debugPrint('[DownloadService] Duplicate download skipped (Disk file exists): "$existingFilePath". URL: $cleanUrl');
+      // Clean up the current download
+      await db.deleteDownload(id);
+      await NotificationService().showCompletionNotification(
+        id: videoTitle.hashCode & 0x7fffffff,
+        title: 'Already Downloaded',
+        body: 'Video "$videoTitle" is already present on disk.',
+      );
+      return true;
+    }
+
+    return false;
   }
 }
 

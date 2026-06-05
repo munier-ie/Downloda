@@ -15,7 +15,8 @@ class OnboardingScreen extends ConsumerStatefulWidget {
   ConsumerState<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
+class _OnboardingScreenState extends ConsumerState<OnboardingScreen>
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
@@ -32,12 +33,31 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   ];
 
   late List<OnboardingData> _pages;
+  late final AnimationController _shakeController;
 
-  Color get _accentColor => const Color(0xFF385144);
+  bool get _isCurrentPageActionCompleted {
+    if (_currentPage == 3) {
+      return _notificationGranted && _storageGranted;
+    }
+    if (_currentPage == 4) {
+      return _batteryIgnored;
+    }
+    return true;
+  }
+
+  void _triggerShake() {
+    _shakeController.forward(from: 0.0);
+    HapticFeedback.heavyImpact();
+  }
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _shakeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 400),
+    );
     _checkPermissions();
     _tipTimer = Timer.periodic(const Duration(seconds: 4), (timer) {
       if (mounted) {
@@ -50,9 +70,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _shakeController.dispose();
     _pageController.dispose();
     _tipTimer?.cancel();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _checkPermissions();
+    }
   }
 
   Future<void> _checkPermissions() async {
@@ -71,8 +100,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   Widget _buildThemeToggler() {
     final settings = ref.watch(settingsProvider);
     final isDark = settings.themeMode == 'dark';
-    final accent = const Color(0xFF385144);
-    final bg = const Color(0xFFEDE8E3);
+    final accent = context.colorAccent;
+    final bg = context.colorElevated;
 
     return Container(
       width: 180,
@@ -123,7 +152,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
-                        color: isDark ? accent.withValues(alpha: 0.6) : const Color(0xFFF8F5F2),
+                        color: isDark ? context.colorTextSecondary : context.colorBackground,
                       ),
                     ),
                   ),
@@ -144,7 +173,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
-                        color: isDark ? const Color(0xFFF8F5F2) : accent.withValues(alpha: 0.6),
+                        color: isDark ? context.colorBackground : context.colorTextSecondary,
                       ),
                     ),
                   ),
@@ -158,6 +187,38 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   void _onNext() async {
+    if (!_isCurrentPageActionCompleted) {
+      _triggerShake();
+      if (_currentPage == 3) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Please grant all required permissions to continue'),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+            backgroundColor: context.colorFailure,
+          ),
+        );
+        if (!_notificationGranted) {
+          await _requestNotification();
+        } else if (!_storageGranted) {
+          await _requestStorage();
+        }
+      } else if (_currentPage == 4) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Please disable battery optimization to continue'),
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 2),
+            backgroundColor: context.colorFailure,
+          ),
+        );
+        if (!_batteryIgnored) {
+          await _requestBatteryOptimization();
+        }
+      }
+      return;
+    }
+
     HapticFeedback.selectionClick();
     if (_currentPage < _pages.length - 1) {
       _pageController.nextPage(
@@ -202,8 +263,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   Widget _buildCompactPermissionItem(String label, IconData icon, bool isGranted, VoidCallback onTap) {
-    final accent = const Color(0xFF385144);
-    final lightBg = isGranted ? accent.withValues(alpha: 0.1) : const Color(0xFFEDE8E3);
+    final accent = context.colorAccent;
+    final lightBg = isGranted ? accent.withValues(alpha: 0.1) : context.colorElevated;
     
     final item = GestureDetector(
       onTap: isGranted ? null : onTap,
@@ -261,7 +322,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   }
 
   Widget _buildBatteryButton() {
-    final accent = const Color(0xFF385144);
+    final accent = context.colorAccent;
     if (_batteryIgnored) {
       return Container(
         height: 44,
@@ -291,7 +352,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         height: 44,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         decoration: BoxDecoration(
-          color: const Color(0xFFEDE8E3),
+          color: context.colorElevated,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -320,7 +381,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           'assets/lottie/gifs/Download.gif',
           width: 300, height: 300,
           fit: BoxFit.contain,
-          errorBuilder: (c, e, s) => Icon(Icons.share_rounded, size: 80, color: _accentColor),
+          errorBuilder: (c, e, s) => Icon(Icons.share_rounded, size: 80, color: context.colorAccent),
         ),
       ),
       OnboardingData(
@@ -330,7 +391,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           'assets/lottie/gifs/theme_toggle.gif',
           width: 240, height: 240,
           fit: BoxFit.contain,
-          errorBuilder: (c, e, s) => Icon(Icons.palette_rounded, size: 60, color: _accentColor),
+          errorBuilder: (c, e, s) => Icon(Icons.palette_rounded, size: 60, color: context.colorAccent),
         ),
         isThemePage: true,
       ),
@@ -341,7 +402,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           'assets/lottie/gifs/secure_privacy.gif',
           width: 270, height: 270,
           fit: BoxFit.contain,
-          errorBuilder: (c, e, s) => Icon(Icons.security_rounded, size: 80, color: _accentColor),
+          errorBuilder: (c, e, s) => Icon(Icons.security_rounded, size: 80, color: context.colorAccent),
         ),
       ),
       OnboardingData(
@@ -351,7 +412,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           'assets/lottie/gifs/notifications.gif',
           width: 240, height: 240,
           fit: BoxFit.contain,
-          errorBuilder: (c, e, s) => Icon(Icons.notifications_rounded, size: 80, color: _accentColor),
+          errorBuilder: (c, e, s) => Icon(Icons.notifications_rounded, size: 80, color: context.colorAccent),
         ),
         isPermissionPage: true,
       ),
@@ -362,7 +423,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           'assets/lottie/gifs/Lowbattery.gif',
           width: 260, height: 260,
           fit: BoxFit.contain,
-          errorBuilder: (c, e, s) => Icon(Icons.battery_charging_full_rounded, size: 80, color: _accentColor),
+          errorBuilder: (c, e, s) => Icon(Icons.battery_charging_full_rounded, size: 80, color: context.colorAccent),
         ),
         isBatteryPage: true,
       ),
@@ -373,24 +434,25 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           'assets/lottie/gifs/friction_free.gif',
           width: 300, height: 300,
           fit: BoxFit.contain,
-          errorBuilder: (c, e, s) => Icon(Icons.rocket_launch_rounded, size: 80, color: _accentColor),
+          errorBuilder: (c, e, s) => Icon(Icons.rocket_launch_rounded, size: 80, color: context.colorAccent),
         ),
         isFinalPage: true,
       ),
     ];
 
-    final currentColor = _accentColor;
+    final isDark = context.isDarkMode;
+    final currentColor = context.colorAccent;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
+      value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.light,
-        systemNavigationBarColor: Color(0xFFF8F5F2),
-        systemNavigationBarIconBrightness: Brightness.dark,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+        systemNavigationBarColor: context.colorBackground,
+        systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
       ),
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8F5F2),
+        backgroundColor: context.colorBackground,
         body: Stack(
           children: [
             // Progress Indicator / Top header
@@ -404,13 +466,13 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF385144).withValues(alpha: 0.08),
+                      color: context.colorAccent.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       'Step ${_currentPage + 1} of ${_pages.length}',
                       style: context.typographyBody.copyWith(
-                        color: const Color(0xFF5C7A6B),
+                        color: context.colorTextSecondary,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
@@ -422,7 +484,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       onPressed: () {
                         _pageController.animateToPage(_pages.length - 1, duration: 600.ms, curve: Curves.easeOutCubic);
                       },
-                      style: TextButton.styleFrom(foregroundColor: const Color(0xFF5C7A6B)),
+                      style: TextButton.styleFrom(foregroundColor: context.colorTextSecondary),
                       child: const Text('Skip'),
                     )
                 ],
@@ -435,8 +497,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               itemCount: _pages.length,
               itemBuilder: (context, index) {
                 final page = _pages[index];
-                final screenHeight = MediaQuery.of(context).size.height;
-                final topPadding = index == 0 ? screenHeight * 0.05 : screenHeight * 0.12;
+                final topPadding = MediaQuery.of(context).padding.top + 64;
   
                 return SingleChildScrollView(
                   physics: const ClampingScrollPhysics(),
@@ -462,7 +523,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             fontSize: 26,
                             fontWeight: FontWeight.bold,
                             letterSpacing: -0.5,
-                            color: const Color(0xFF385144),
+                            color: context.colorTextPrimary,
                           ),
                         ).animate(key: ValueKey('title_$index')).fadeIn(delay: 200.ms).slideY(begin: 0.1),
                         const SizedBox(height: 16),
@@ -470,7 +531,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           page.subtitle,
                           textAlign: TextAlign.center,
                           style: context.typographyBody.copyWith(
-                            color: const Color(0xFF5C7A6B),
+                            color: context.colorTextSecondary,
                             height: 1.6,
                             fontSize: 14,
                           ),
@@ -485,24 +546,37 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                             .slideY(begin: 0.2),
                         ] else if (page.isPermissionPage) ...[
                           const SizedBox(height: 24),
-                          Row(
-                            children: [
-                              _buildCompactPermissionItem('Notifications', Icons.notifications_rounded, _notificationGranted, _requestNotification),
-                              const SizedBox(width: 12),
-                              _buildCompactPermissionItem('Storage Access', Icons.folder_rounded, _storageGranted, _requestStorage),
+                          Animate(
+                            controller: _shakeController,
+                            autoPlay: false,
+                            effects: const [
+                              ShakeEffect(hz: 8, curve: Curves.easeInOut),
                             ],
+                            child: Row(
+                              children: [
+                                _buildCompactPermissionItem('Notifications', Icons.notifications_rounded, _notificationGranted, _requestNotification),
+                                const SizedBox(width: 12),
+                                _buildCompactPermissionItem('Storage Access', Icons.folder_rounded, _storageGranted, _requestStorage),
+                              ],
+                            ),
                           ).animate(key: ValueKey('permission_row_$index'))
                            .fadeIn(delay: 500.ms)
                            .slideY(begin: 0.2),
                         ] else if (page.isBatteryPage) ...[
                           const SizedBox(height: 24),
-                          _buildBatteryButton()
-                            .animate(key: ValueKey('battery_button_$index'))
-                            .fadeIn(delay: 500.ms)
-                            .slideY(begin: 0.2),
+                          Animate(
+                            controller: _shakeController,
+                            autoPlay: false,
+                            effects: const [
+                              ShakeEffect(hz: 8, curve: Curves.easeInOut),
+                            ],
+                            child: _buildBatteryButton(),
+                          ).animate(key: ValueKey('battery_button_$index'))
+                           .fadeIn(delay: 500.ms)
+                           .slideY(begin: 0.2),
                         ],
                         
-                        const SizedBox(height: 160), // Space for bottom controls
+                        SizedBox(height: 160 + MediaQuery.of(context).padding.bottom), // Space for bottom controls
                       ],
                     ),
                   ),
@@ -512,7 +586,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   
             // Bottom Controls & Pro Tips
             Positioned(
-              bottom: 40,
+              bottom: MediaQuery.of(context).padding.bottom + 24,
               left: 32,
               right: 32,
               child: Column(
@@ -548,7 +622,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                               Expanded(
                                 child: Text(
                                   _proTips[_currentTip],
-                                  style: context.typographyBody.copyWith(color: const Color(0xFF5C7A6B), fontSize: 13),
+                                  style: context.typographyBody.copyWith(color: context.colorTextSecondary, fontSize: 13),
                                 ),
                               ),
                             ],
@@ -567,7 +641,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         height: 6,
                         width: _currentPage == i ? 18 : 6,
                         decoration: BoxDecoration(
-                          color: _currentPage == i ? currentColor : const Color(0xFF5C7A6B).withValues(alpha: 0.3),
+                          color: _currentPage == i ? currentColor : context.colorTextSecondary.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(3),
                         ),
                       ),
@@ -575,47 +649,68 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   ),
                   const SizedBox(height: 24),
   
-                  // Centered Pill Button with Shiny Shimmer
-                  GestureDetector(
-                    onTap: _onNext,
-                    child: Container(
-                      width: 200,
-                      height: 50,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: currentColor,
-                        borderRadius: BorderRadius.circular(999), // Fully rounded pill
-                        boxShadow: [
-                          BoxShadow(
-                            color: currentColor.withValues(alpha: 0.25),
-                            blurRadius: 16,
-                            offset: const Offset(0, 6),
-                          )
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            _currentPage == _pages.length - 1 ? 'Get Started' : 'Continue',
-                            style: context.typographyH3.copyWith(
-                              color: const Color(0xFFF8F5F2),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 15,
-                            ),
+                  // Centered Pill Button with Shake and conditional Shimmer
+                  () {
+                    Widget pillButton = GestureDetector(
+                      onTap: _onNext,
+                      child: Opacity(
+                        opacity: _isCurrentPageActionCompleted ? 1.0 : 0.5,
+                        child: Container(
+                          width: 200,
+                          height: 50,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: currentColor,
+                            borderRadius: BorderRadius.circular(999), // Fully rounded pill
+                            boxShadow: [
+                              BoxShadow(
+                                color: currentColor.withValues(alpha: 0.25),
+                                blurRadius: 16,
+                                offset: const Offset(0, 6),
+                              )
+                            ],
                           ),
-                          const SizedBox(width: 8),
-                          const Icon(
-                            Icons.arrow_forward_rounded,
-                            color: Color(0xFFF8F5F2),
-                            size: 16,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                _currentPage == _pages.length - 1 ? 'Get Started' : 'Continue',
+                                style: context.typographyH3.copyWith(
+                                  color: context.colorBackground,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Icon(
+                                Icons.arrow_forward_rounded,
+                                color: context.colorBackground,
+                                size: 16,
+                              ),
+                            ],
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ).animate(onPlay: (controller) => controller.repeat())
-                   .shimmer(duration: 2.seconds, color: Colors.white.withValues(alpha: 0.45)),
+                    );
+
+                    // Add shimmer effect only if completed
+                    if (_isCurrentPageActionCompleted) {
+                      pillButton = pillButton
+                          .animate(onPlay: (controller) => controller.repeat())
+                          .shimmer(duration: 2.seconds, color: Colors.white.withValues(alpha: 0.45));
+                    }
+
+                    // Wrap in shake animation
+                    return Animate(
+                      controller: _shakeController,
+                      autoPlay: false,
+                      effects: const [
+                        ShakeEffect(hz: 8, curve: Curves.easeInOut),
+                      ],
+                      child: pillButton,
+                    );
+                  }(),
                 ],
               ),
             ).animate().fadeIn(delay: 800.ms),

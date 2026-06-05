@@ -67,7 +67,7 @@ void callbackDispatcher() {
 
         // Check if user has "Always Ask" resolution — queue with marker 'ask'
         final prefs = await SharedPreferences.getInstance();
-        final defaultRes = prefs.getString('defaultRes') ?? '1080p';
+        final defaultRes = prefs.getString('defaultRes') ?? '720p';
         final resolution =
             defaultRes == 'Always Ask' ? 'ask' : defaultRes;
 
@@ -220,7 +220,7 @@ class DwldrApp extends ConsumerWidget {
   const DwldrApp({super.key});
 
   ThemeMode _parseThemeMode(String? mode) {
-    if (mode == null) return ThemeMode.dark;
+    if (mode == null) return ThemeMode.light;
     switch (mode) {
       case 'light':
         return ThemeMode.light;
@@ -229,7 +229,7 @@ class DwldrApp extends ConsumerWidget {
       case 'system':
         return ThemeMode.system;
       default:
-        return ThemeMode.dark;
+        return ThemeMode.light;
     }
   }
 
