@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../core/theme.dart';
 import '../core/models.dart';
@@ -111,6 +112,7 @@ class PlatformBadge extends StatelessWidget {
       case MediaPlatform.tiktok:    return const Color(0xFF69C9D0);
       case MediaPlatform.facebook:  return const Color(0xFF1877F2);
       case MediaPlatform.x:         return Colors.black;
+      case MediaPlatform.reddit:    return const Color(0xFFFF4500);
     }
   }
 
@@ -121,6 +123,7 @@ class PlatformBadge extends StatelessWidget {
       case MediaPlatform.tiktok:    return 'TT';
       case MediaPlatform.facebook:  return 'FB';
       case MediaPlatform.x:         return 'X';
+      case MediaPlatform.reddit:    return 'RD';
     }
   }
 
@@ -371,12 +374,12 @@ class SkillListRow extends StatelessWidget {
   }
 }
 
-class TopToast extends StatefulWidget {
+class AppToast extends StatefulWidget {
   final String message;
   final bool isError;
   final VoidCallback onDismiss;
 
-  const TopToast({
+  const AppToast({
     super.key,
     required this.message,
     required this.isError,
@@ -393,7 +396,7 @@ class TopToast extends StatefulWidget {
 
     overlayEntry = OverlayEntry(
       builder: (context) {
-        return TopToast(
+        return AppToast(
           message: message,
           isError: isError,
           onDismiss: () {
@@ -409,10 +412,10 @@ class TopToast extends StatefulWidget {
   }
 
   @override
-  State<TopToast> createState() => _TopToastState();
+  State<AppToast> createState() => _AppToastState();
 }
 
-class _TopToastState extends State<TopToast> with SingleTickerProviderStateMixin {
+class _AppToastState extends State<AppToast> with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<Offset> _offsetAnimation;
   late final Animation<double> _fadeAnimation;
@@ -422,12 +425,12 @@ class _TopToastState extends State<TopToast> with SingleTickerProviderStateMixin
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 350),
       vsync: this,
     );
 
     _offsetAnimation = Tween<Offset>(
-      begin: const Offset(0.0, -1.5),
+      begin: const Offset(0.0, 1.5),
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: _controller,
@@ -471,62 +474,61 @@ class _TopToastState extends State<TopToast> with SingleTickerProviderStateMixin
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final topPadding = MediaQuery.of(context).padding.top;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
 
     return Positioned(
-      top: topPadding + 12,
-      left: 16,
-      right: 16,
+      bottom: bottomPadding + 56,
+      left: 32,
+      right: 32,
       child: SlideTransition(
         position: _offsetAnimation,
         child: FadeTransition(
           opacity: _fadeAnimation,
           child: GestureDetector(
             onVerticalDragUpdate: (details) {
-              if (details.primaryDelta! < -5) {
+              if (details.primaryDelta! > 5) {
                 _dismiss();
               }
             },
             child: Material(
               color: Colors.transparent,
-              child: Container(
-                width: screenWidth - 32,
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                decoration: BoxDecoration(
-                  color: context.colorSurface.withValues(alpha: 0.95),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: widget.isError
-                        ? context.colorFailure.withValues(alpha: 0.3)
-                        : context.colorAccent.withValues(alpha: 0.3),
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 8),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(100),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: context.colorSurface.withValues(alpha: 0.88),
+                      borderRadius: BorderRadius.circular(100),
+                      border: Border.all(
+                        color: (widget.isError ? context.colorFailure : context.colorAccent)
+                            .withValues(alpha: 0.25),
+                        width: 1.2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.15),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         Container(
-                          width: 32,
-                          height: 32,
+                          width: 24,
+                          height: 24,
                           decoration: BoxDecoration(
                             color: (widget.isError ? context.colorFailure : context.colorAccent)
                                 .withValues(alpha: 0.12),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
-                            widget.isError ? Icons.error_outline_rounded : Icons.info_outline_rounded,
+                            widget.isError ? Icons.error_outline_rounded : Icons.check_circle_outline_rounded,
                             color: widget.isError ? context.colorFailure : context.colorAccent,
-                            size: 18,
+                            size: 14,
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -534,28 +536,15 @@ class _TopToastState extends State<TopToast> with SingleTickerProviderStateMixin
                           child: Text(
                             widget.message,
                             style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600,
                               color: context.colorTextPrimary,
-                              height: 1.3,
                             ),
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10),
-                    // Centered dismiss handle line / pill indicator (Progress Bar look)
-                    Center(
-                      child: Container(
-                        width: 36,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: context.colorDivider,
-                          borderRadius: BorderRadius.circular(2),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
             ),

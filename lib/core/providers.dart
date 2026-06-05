@@ -1,4 +1,3 @@
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'database/database.dart';
@@ -140,13 +139,6 @@ class SettingsNotifier extends Notifier<AppSettings> {
     prefs.setBool('batterySaver', settings.batterySaver);
     prefs.setInt('seekDuration', settings.seekDuration);
     prefs.setString('themeMode', settings.themeMode);
-
-    // Call dynamic app icon switcher on Android
-    if (settings.themeMode == 'light' || settings.themeMode == 'dark') {
-      const MethodChannel('com.downloda.app/app_icon')
-          .invokeMethod('changeIcon', {'mode': settings.themeMode})
-          .catchError((e) => {});
-    }
   }
 }
 

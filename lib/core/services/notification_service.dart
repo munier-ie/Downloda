@@ -1,22 +1,68 @@
 import 'dart:ui';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:flutter/foundation.dart';
 
+import 'package:flutter/widgets.dart';
+import 'package:drift/drift.dart';
+import 'package:dwldr/core/database/database.dart';
+import 'package:dwldr/core/models.dart';
 
 /// Background notification tap handler.
-/// Instead of spinning up a new DownloadService (which has empty maps),
-/// we route commands through the foreground isolate via IsolateNameServer.
+/// Modifies database directly and notifies active streams.
 @pragma('vm:entry-point')
 void notificationTapBackground(NotificationResponse details) async {
+  WidgetsFlutterBinding.ensureInitialized();
+  DartPluginRegistrant.ensureInitialized();
+
   final id = details.payload;
   final action = details.actionId;
   if (id == null || action == null) return;
 
   debugPrint('[NotificationService] Action clicked: $action for ID: $id');
 
-  // Send to ALL potential command ports.
-  // This ensures that the isolate owning the download task receives the command.
-  
+  try {
+    final db = AppDatabase();
+    if (action == 'pause') {
+      final existing = await db.getDownloadById(id);
+      if (existing != null) {
+        final companion = existing.toCompanion(false).copyWith(
+          status: const Value(DownloadStatus.paused),
+        );
+        await db.updateDownload(companion);
+        
+        final notifId = id.hashCode & 0x7fffffff;
+        await NotificationService().showProgressNotification(
+          id: notifId,
+          title: existing.title,
+          body: 'Paused • ${(existing.progress * 100).toInt()}%',
+          progress: (existing.progress * 100).toInt(),
+          maxProgress: 100,
+          ongoing: false,
+          actions: [
+            const AndroidNotificationAction('resume', 'Resume', showsUserInterface: false),
+            const AndroidNotificationAction('cancel', 'Cancel', showsUserInterface: false),
+          ],
+          payload: id,
+        );
+      }
+    } else if (action == 'resume') {
+      final existing = await db.getDownloadById(id);
+      if (existing != null) {
+        final companion = existing.toCompanion(false).copyWith(
+          status: const Value(DownloadStatus.queued),
+        );
+        await db.updateDownload(companion);
+      }
+    } else if (action == 'cancel') {
+      await db.deleteDownload(id);
+      final notifId = id.hashCode & 0x7fffffff;
+      await NotificationService().cancel(notifId);
+    }
+    await db.close();
+  } catch (e, stack) {
+    debugPrint('[NotificationService] Error in background DB update: $e\n$stack');
+  }
+
+  // Send to ALL potential command ports as a fallback.
   final cmdPort = IsolateNameServer.lookupPortByName('dwldr_cmd_port');
   if (cmdPort != null) {
     debugPrint('[NotificationService] Routing to foreground port');
@@ -109,7 +155,7 @@ class NotificationService {
       onlyAlertOnce: true,
       autoCancel: !ongoing,
       actions: actions,
-      color: const Color(0xFF8B5CF6),
+      color: const Color(0xFF385144),
       showWhen: false,
     );
 
@@ -138,7 +184,7 @@ class NotificationService {
       priority: Priority.high,
       ongoing: false,
       autoCancel: true,
-      color: const Color(0xFF8B5CF6),
+      color: const Color(0xFF385144),
     );
 
     await _plugin.show(

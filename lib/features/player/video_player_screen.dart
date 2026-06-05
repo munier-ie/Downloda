@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../core/models.dart';
+import '../../core/theme.dart';
 
 
 /// Full-screen landscape video player for locally downloaded files.
@@ -52,8 +53,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
-    // Default to landscape
-    _setLandscape();
     _initPlayer();
   }
 
@@ -101,6 +100,14 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     _controller = VideoPlayerController.file(file);
 
     await _controller!.initialize();
+    
+    final double aspect = _controller!.value.aspectRatio;
+    if (aspect < 1.0) {
+      _setPortrait();
+    } else {
+      _setLandscape();
+    }
+
     _controller!.addListener(_onVideoUpdate);
     _controller!.play();
 
@@ -228,8 +235,8 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                       aspectRatio: ctrl.value.aspectRatio,
                       child: VideoPlayer(ctrl),
                     )
-                  : const CircularProgressIndicator(
-                      color: Color(0xFF8B5CF6),
+                  : CircularProgressIndicator(
+                      color: context.colorAccent,
                       strokeWidth: 2,
                     ),
             ),
@@ -380,7 +387,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                                     enabledThumbRadius: 6),
                                 overlayShape: const RoundSliderOverlayShape(
                                     overlayRadius: 14),
-                                activeTrackColor: const Color(0xFF8B5CF6),
+                                activeTrackColor: context.colorAccent,
                                 inactiveTrackColor:
                                     Colors.white.withValues(alpha: 0.2),
                                 thumbColor: Colors.white,

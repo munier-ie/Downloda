@@ -1,24 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 extension ThemeContext on BuildContext {
   bool get isDarkMode => Theme.of(this).brightness == Brightness.dark;
 
-  Color get colorBackground => isDarkMode ? const Color(0xFF0F1115) : const Color(0xFFF8FAFC);
-  Color get colorSurface => isDarkMode ? const Color(0xFF171A20) : const Color(0xFFFFFFFF);
-  Color get colorElevated => isDarkMode ? const Color(0xFF1E222B) : const Color(0xFFF1F5F9);
-  Color get colorAccent => const Color(0xFF8B5CF6);
-  Color get colorAccentDim => const Color(0x338B5CF6);
-  Color get colorSuccess => const Color(0xFF22C55E);
-  Color get colorFailure => const Color(0xFFEF4444);
-  Color get colorWarning => const Color(0xFFF59E0B);
+  // Light: #F8F5F2 bg, #385144 accent/text | Dark: #385144 bg, #F8F5F2 accent/text
+  Color get colorBackground => isDarkMode ? const Color(0xFF385144) : const Color(0xFFF8F5F2);
+  Color get colorSurface => isDarkMode ? const Color(0xFF2E4238) : const Color(0xFFFFFFFF);
+  Color get colorElevated => isDarkMode ? const Color(0xFF26382F) : const Color(0xFFEDE8E3);
+  Color get colorAccent => isDarkMode ? const Color(0xFFF8F5F2) : const Color(0xFF385144);
+  Color get colorAccentDim => isDarkMode ? const Color(0x26F8F5F2) : const Color(0x1F385144);
+  Color get colorSuccess => isDarkMode ? const Color(0xFF5DBE8A) : const Color(0xFF2D7A4F);
+  Color get colorFailure => isDarkMode ? const Color(0xFFE57373) : const Color(0xFFC0392B);
+  Color get colorWarning => isDarkMode ? const Color(0xFFFFB74D) : const Color(0xFFD4870A);
   
-  Color get colorTextPrimary => isDarkMode ? const Color(0xFFE8EAF0) : const Color(0xFF0F1115);
-  Color get colorTextSecondary => isDarkMode ? const Color(0xFF8A8FA8) : const Color(0xFF64748B);
-  Color get colorTextTertiary => isDarkMode ? const Color(0xFF4A4F63) : const Color(0xFF94A3B8);
+  Color get colorTextPrimary => isDarkMode ? const Color(0xFFF8F5F2) : const Color(0xFF385144);
+  Color get colorTextSecondary => isDarkMode ? const Color(0xFFBFD4C8) : const Color(0xFF5C7A6B);
+  Color get colorTextTertiary => isDarkMode ? const Color(0xFF7AA38E) : const Color(0xFF8AAB9A);
   
-  Color get colorDivider => isDarkMode ? const Color(0xFF1E222B) : const Color(0xFFE2E8F0);
-  Color get colorRingTrack => isDarkMode ? const Color(0x14FFFFFF) : const Color(0x14000000);
+  Color get colorDivider => isDarkMode ? const Color(0xFF26382F) : const Color(0xFFD9D2CA);
+  Color get colorRingTrack => isDarkMode ? const Color(0x14F8F5F2) : const Color(0x14385144);
 
   TextStyle get typographyH1 => GoogleFonts.inter(
         fontSize: 26,
@@ -73,14 +75,15 @@ extension ThemeContext on BuildContext {
 class DwldrTheme {
   static ThemeData _build(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
-    final bg = isDark ? const Color(0xFF0F1115) : const Color(0xFFF8FAFC);
-    final surface = isDark ? const Color(0xFF171A20) : const Color(0xFFFFFFFF);
-    final text = isDark ? const Color(0xFFE8EAF0) : const Color(0xFF0F1115);
-    final elevated = isDark ? const Color(0xFF1E222B) : const Color(0xFFF1F5F9);
-    final divider = isDark ? const Color(0xFF1E222B) : const Color(0xFFE2E8F0);
-    final accent = const Color(0xFF8B5CF6);
-    final textTertiary = isDark ? const Color(0xFF4A4F63) : const Color(0xFF94A3B8);
-    final accentDim = const Color(0x338B5CF6);
+    // Light: #F8F5F2 bg, #385144 text/accent | Dark: inverted
+    final bg = isDark ? const Color(0xFF385144) : const Color(0xFFF8F5F2);
+    final surface = isDark ? const Color(0xFF2E4238) : const Color(0xFFFFFFFF);
+    final text = isDark ? const Color(0xFFF8F5F2) : const Color(0xFF385144);
+    final elevated = isDark ? const Color(0xFF26382F) : const Color(0xFFEDE8E3);
+    final divider = isDark ? const Color(0xFF26382F) : const Color(0xFFD9D2CA);
+    final accent = isDark ? const Color(0xFFF8F5F2) : const Color(0xFF385144);
+    final textTertiary = isDark ? const Color(0xFF7AA38E) : const Color(0xFF8AAB9A);
+    final accentDim = isDark ? const Color(0x26F8F5F2) : const Color(0x1F385144);
 
     return ThemeData(
       brightness: brightness,
@@ -102,6 +105,13 @@ class DwldrTheme {
         backgroundColor: bg,
         elevation: 0,
         scrolledUnderElevation: 0,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+          statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+          systemNavigationBarColor: bg,
+          systemNavigationBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        ),
         titleTextStyle: GoogleFonts.inter(
           fontSize: 14,
           fontWeight: FontWeight.w500,
@@ -109,7 +119,7 @@ class DwldrTheme {
           letterSpacing: 0.2,
         ),
         iconTheme: IconThemeData(
-          color: isDark ? const Color(0xFF8A8FA8) : const Color(0xFF64748B),
+          color: isDark ? const Color(0xFFBFD4C8) : const Color(0xFF5C7A6B),
           size: 20,
         ),
       ),

@@ -60,6 +60,9 @@ void callbackDispatcher() {
         } else if (cleanUrl.contains('x.com') ||
             cleanUrl.contains('twitter.com')) {
           platform = MediaPlatform.x;
+        } else if (cleanUrl.contains('reddit.com') ||
+            cleanUrl.contains('redd.it')) {
+          platform = MediaPlatform.reddit;
         }
 
         // Check if user has "Always Ask" resolution — queue with marker 'ask'
@@ -244,6 +247,7 @@ class DwldrApp extends ConsumerWidget {
       SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
         systemNavigationBarColor: Colors.transparent,
         systemNavigationBarIconBrightness:
             isDark ? Brightness.light : Brightness.dark,
@@ -347,6 +351,9 @@ class _AppShellState extends ConsumerState<AppShell>
       }
     });
 
+    // Reset stuck active downloads (preparing/downloading/processing) to paused on start
+    ref.read(downloadServiceProvider).resetActiveDownloadsToPaused();
+
     // WiFi reconnect watcher
     _connectivityStream = Connectivity().onConnectivityChanged;
     _connectivityStream.listen(_onConnectivityChanged);
@@ -431,6 +438,7 @@ class _AppShellState extends ConsumerState<AppShell>
     if (!mounted) return;
     ref.invalidate(activeDownloadsProvider);
     final service = ref.read(downloadServiceProvider);
+    service.syncLocalDownloads();
     service.checkQueue();
 
     // Check for items queued with resolution='ask' (from share intent)

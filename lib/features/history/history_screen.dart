@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../core/theme.dart';
 import '../../core/models.dart';
@@ -34,13 +35,13 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
   Future<void> _playVideo(
       BuildContext context, DownloadItem item, List<DownloadItem> allItems) async {
     if (item.filePath == null) {
-      TopToast.show(context, message: 'No file path saved', isError: true);
+      AppToast.show(context, message: 'No file path saved', isError: true);
       return;
     }
     final exists = await File(item.filePath!).exists();
     if (!context.mounted) return;
     if (!exists) {
-      TopToast.show(context,
+      AppToast.show(context,
           message: 'File not found on device', isError: true);
       return;
     }
@@ -73,18 +74,18 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
 
   Future<void> _convertToAudio(BuildContext context, DownloadItem item) async {
     if (item.filePath == null) {
-      TopToast.show(context, message: 'No file path saved', isError: true);
+      AppToast.show(context, message: 'No file path saved', isError: true);
       return;
     }
     final exists = await File(item.filePath!).exists();
     if (!context.mounted) return;
     if (!exists) {
-      TopToast.show(context,
+      AppToast.show(context,
           message: 'File not found on device', isError: true);
       return;
     }
 
-    TopToast.show(context, message: 'Converting to MP3 in background...');
+    AppToast.show(context, message: 'Converting to MP3 in background...');
 
     // Run conversion without blocking UI
     ref.read(conversionServiceProvider).convertToAudio(item).then((_) {
@@ -180,8 +181,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                   final db = ref.read(databaseProvider);
                   item.status = DownloadStatus.queued;
                   await db.updateDownload(item.toCompanion());
+                  await ref.read(downloadServiceProvider).checkQueue();
                   if (!context.mounted) return;
-                  TopToast.show(context, message: 'Added back to queue');
+                  AppToast.show(context, message: 'Added back to queue');
                 },
               ),
 
@@ -252,7 +254,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                           .deleteDownload(item.id);
                       if (!context.mounted) return;
                       // ignore: use_build_context_synchronously
-                      TopToast.show(context, message: 'File deleted');
+                      AppToast.show(context, message: 'File deleted');
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: context.colorFailure,
@@ -429,12 +431,19 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(11),
                                     child: item.thumbnailUrl != null && !isAudio
-                                        ? Image.network(
-                                            item.thumbnailUrl!,
-                                            fit: BoxFit.cover,
-                                            errorBuilder: (context, error, stackTrace) => 
-                                              Icon(Icons.video_library_rounded, size: 20, color: context.colorTextTertiary),
-                                          )
+                                        ? (item.thumbnailUrl!.startsWith('http')
+                                            ? CachedNetworkImage(
+                                                imageUrl: item.thumbnailUrl!,
+                                                fit: BoxFit.cover,
+                                                errorWidget: (context, url, error) => 
+                                                  Icon(Icons.video_library_rounded, size: 20, color: context.colorTextTertiary),
+                                              )
+                                            : Image.file(
+                                                File(item.thumbnailUrl!),
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (context, error, stackTrace) =>
+                                                  Icon(Icons.video_library_rounded, size: 20, color: context.colorTextTertiary),
+                                              ))
                                         : Icon(
                                             isAudio ? Icons.audiotrack_rounded : Icons.video_library_rounded,
                                             size: 20,
@@ -462,8 +471,17 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 20, vertical: 2),
-                                    child: SkillListRow(
-                                      avatar: avatar,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        if (isCompleted && _isVideoFormat(item.format)) {
+                                          _playVideo(context, item, allHistory);
+                                        } else {
+                                          _showItemMenu(context, item, allHistory);
+                                        }
+                                      },
+                                      behavior: HitTestBehavior.opaque,
+                                      child: SkillListRow(
+                                        avatar: avatar,
                                       title: Row(children: [
                                         PlatformBadge(
                                             platform: item.platform),
@@ -532,6 +550,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
                                       ),
                                     ),
                                   ),
+                                 ),
                                 );
                               },
                               childCount: filteredItems.length,

@@ -11,7 +11,7 @@ enum DownloadStatus {
   failed,
 }
 
-enum MediaPlatform { youtube, instagram, tiktok, facebook, x }
+enum MediaPlatform { youtube, instagram, tiktok, facebook, x, reddit }
 
 class DownloadItem {
   final String id;
@@ -58,6 +58,8 @@ class DownloadItem {
         return 'Facebook';
       case MediaPlatform.x:
         return 'X (Twitter)';
+      case MediaPlatform.reddit:
+        return 'Reddit';
     }
   }
 

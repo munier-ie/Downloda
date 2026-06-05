@@ -132,7 +132,7 @@ class _WhatsappScreenState extends State<WhatsappScreen> {
       
       if (await dest.exists()) {
         if (mounted) {
-          TopToast.show(context, message: 'Already saved to Download/Downloda/statuses');
+          AppToast.show(context, message: 'Already saved to Download/Downloda/statuses');
         }
         return; // Skip copying
       }
@@ -148,11 +148,11 @@ class _WhatsappScreenState extends State<WhatsappScreen> {
       }
 
       if (mounted) {
-        TopToast.show(context, message: 'Saved to Download/Downloda/statuses');
+        AppToast.show(context, message: 'Saved to Download/Downloda/statuses');
       }
     } catch (e) {
       if (mounted) {
-        TopToast.show(context, message: 'Save failed: $e', isError: true);
+        AppToast.show(context, message: 'Save failed: $e', isError: true);
       }
     }
   }

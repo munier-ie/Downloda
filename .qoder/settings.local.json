@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find build -name \"*.apk\" | head -20)",
+      "Bash(adb version:*)"
+    ]
+  }
+}

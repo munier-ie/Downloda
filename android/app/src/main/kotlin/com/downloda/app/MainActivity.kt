@@ -51,52 +51,12 @@ class MainActivity : FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, ICON_CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
                 "changeIcon" -> {
-                    val mode = call.argument<String>("mode") ?: "light"
-                    changeAppIcon(applicationContext, mode)
                     result.success(true)
                 }
                 else -> {
                     result.notImplemented()
                 }
             }
-        }
-    }
-
-    private fun changeAppIcon(context: Context, mode: String) {
-        val pm = context.packageManager
-        val lightAlias = ComponentName(context, "com.downloda.app.MainActivityLight")
-        val darkAlias = ComponentName(context, "com.downloda.app.MainActivityDark")
-
-        try {
-            if (mode == "dark") {
-                // Enable Dark Icon
-                pm.setComponentEnabledSetting(
-                    darkAlias,
-                    PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                    PackageManager.DONT_KILL_APP
-                )
-                // Disable Light Icon
-                pm.setComponentEnabledSetting(
-                    lightAlias,
-                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                    PackageManager.DONT_KILL_APP
-                )
-            } else {
-                // Enable Light Icon
-                pm.setComponentEnabledSetting(
-                    lightAlias,
-                    PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
-                    PackageManager.DONT_KILL_APP
-                )
-                // Disable Dark Icon
-                pm.setComponentEnabledSetting(
-                    darkAlias,
-                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                    PackageManager.DONT_KILL_APP
-                )
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
         }
     }
 

@@ -7,36 +7,30 @@
   <meta name="description" content="Tired of copying links and switching apps? Downloda is a free, tracker-free Android utility that runs in the background. Share videos directly from TikTok, YouTube, Twitter (X), or Facebook and keep scrolling.">
   <meta name="keywords" content="Downloda, Android downloader, background video downloader, YouTube converter, TikTok downloader, WhatsApp status saver, open source downloader, ad-free video downloader, Drift database, offline media muxer">
   <meta name="author" content="Munier">
-  
-  <!-- SEO & Geo-Ready Tags -->
+
   <link rel="canonical" href="https://github.com/munier-ie/Downloda">
   <meta name="robots" content="index, follow">
-  
-  <!-- Geotargeting Meta Tags -->
+
   <meta name="geo.region" content="IE-D" />
   <meta name="geo.placename" content="Dublin" />
   <meta name="geo.position" content="53.3498;-6.2603" />
   <meta name="ICBM" content="53.3498, -6.2603" />
-  
-  <!-- Open Graph / Facebook -->
+
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://github.com/munier-ie/Downloda">
   <meta property="og:title" content="Downloda — Zero-Friction Background Media Downloader">
   <meta property="og:description" content="No copy-pasting, no scrolling interruptions. Share directly to Downloda and keep scrolling while videos download natively in the background. 100% open source & ad-free.">
-  <meta property="og:image" content="logos/LightDwldrLogo.png">
+  <meta property="og:image" content="logos/logo.png">
   <meta property="og:locale" content="en_US">
 
-  <!-- Twitter -->
   <meta property="twitter:card" content="summary_large_image">
   <meta property="twitter:url" content="https://github.com/munier-ie/Downloda">
   <meta property="twitter:title" content="Downloda — Zero-Friction Background Media Downloader">
   <meta property="twitter:description" content="No copy-pasting, no scrolling interruptions. Share directly to Downloda and keep scrolling while videos download natively in the background. 100% open source & ad-free.">
-  <meta property="twitter:image" content="logos/LightDwldrLogo.png">
+  <meta property="twitter:image" content="logos/logo.png">
 
-  <!-- Favicon: Using real logo instead of Flutter's default -->
-  <link rel="icon" type="image/png" href="logos/LightDwldrLogo.png">
+  <link rel="icon" type="image/png" href="favicon.png">
 
-  <!-- Structured SEO Data: SoftwareApplication Schema -->
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -69,12 +63,11 @@
         "Convert To Audio",
         "Haptic Feedbacks"
       ],
-      "image": "logos/LightDwldrLogo.png",
+      "image": "logos/logo.png",
       "minAndroidVersion": "21"
     }
   </script>
-  
-  <!-- Styling and Fonts -->
+
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -99,8 +92,13 @@
             "success": "var(--success)",
             "failure": "var(--failure)",
             "warning": "var(--warning)",
-            "brand-orange": "#E96443",
-            "brand-pink": "#904E95"
+            "sim-bg": "var(--sim-bg)",
+            "sim-text": "var(--sim-text)",
+            "sim-muted": "var(--sim-muted)",
+            "sim-line": "var(--sim-line)",
+            "sim-statusbar-bg": "var(--sim-statusbar-bg)",
+            "sim-share-bg": "var(--sim-share-bg)",
+            "sim-border": "var(--sim-border)"
           },
           borderRadius: {
             "DEFAULT": "0.125rem",
@@ -131,34 +129,48 @@
   </script>
   
   <style>
-    /* Theme color variables extracted from the App's native theme.dart */
+    
     :root {
-      --bg: #F8FAFC;
+      --bg: #F8F5F2;
       --surface: #FFFFFF;
-      --elevated: #F1F5F9;
-      --text: #0F1115;
-      --muted: #64748B;
-      --muted-light: #94A3B8;
-      --line: #E2E8F0;
-      --accent: #8B5CF6;
-      --accent-dim: rgba(139, 92, 246, 0.15);
-      --success: #22C55E;
-      --failure: #EF4444;
-      --warning: #F59E0B;
+      --elevated: #EDE8E3;
+      --text: #385144;
+      --muted: #5C7A6B;
+      --muted-light: #8AAB9A;
+      --line: #D9D2CA;
+      --accent: #385144;
+      --accent-dim: rgba(56, 81, 68, 0.12);
+      --success: #2D7A4F;
+      --failure: #C0392B;
+      --warning: #D4870A;
+      --sim-bg: #FFFFFF;
+      --sim-text: #385144;
+      --sim-muted: #5C7A6B;
+      --sim-line: #EDE8E3;
+      --sim-statusbar-bg: rgba(248, 245, 242, 0.9);
+      --sim-share-bg: #F8F5F2;
+      --sim-border: #D9D2CA;
     }
     html.dark {
-      --bg: #0F1115;
-      --surface: #171A20;
-      --elevated: #1E222B;
-      --text: #E8EAF0;
-      --muted: #8A8FA8;
-      --muted-light: #4A4F63;
-      --line: #1E222B;
-      --accent: #8B5CF6;
-      --accent-dim: rgba(139, 92, 246, 0.25);
-      --success: #22C55E;
-      --failure: #EF4444;
-      --warning: #F59E0B;
+      --bg: #385144;
+      --surface: #2E4238;
+      --elevated: #26382F;
+      --text: #F8F5F2;
+      --muted: #BFD4C8;
+      --muted-light: #7AA38E;
+      --line: #26382F;
+      --accent: #F8F5F2;
+      --accent-dim: rgba(248, 245, 242, 0.15);
+      --success: #5DBE8A;
+      --failure: #E57373;
+      --warning: #FFB74D;
+      --sim-bg: #26382F;
+      --sim-text: #F8F5F2;
+      --sim-muted: #BFD4C8;
+      --sim-line: #26382F;
+      --sim-statusbar-bg: rgba(38, 56, 47, 0.9);
+      --sim-share-bg: #2E4238;
+      --sim-border: #26382F;
     }
 
     html {
@@ -204,8 +216,7 @@
       right: 0;
       background: linear-gradient(to left, var(--bg), transparent);
     }
-    
-    /* Elegant Custom Theme-Responsive Scrollbar */
+
     ::-webkit-scrollbar {
       width: 8px;
     }
@@ -220,7 +231,6 @@
       background: var(--muted);
     }
 
-    /* Shimmer Effect for Download Cards */
     @keyframes shimmer {
       100% { transform: translateX(100%); }
     }
@@ -239,7 +249,6 @@
       content: '';
     }
 
-    /* Pixel-accurate iPhone 15 Pro Device Frame inspired by mobile-app skill */
     .iphone-frame {
       position: relative;
       width: 250px;
@@ -330,32 +339,31 @@
 </head>
 <body class="text-text min-h-screen antialiased selection:bg-black selection:text-white bg-page-bg">
 
-  <!-- 1. Navigation Header (Increased width and height to accommodate all the menu options cleanly) -->
   <header class="fixed top-[24px] left-0 right-0 z-50 flex items-center justify-center px-4 w-full pointer-events-none">
-    <div class="pointer-events-auto w-full max-w-[1140px] flex items-center justify-between bg-black/90 backdrop-blur-xl rounded-full px-4 sm:px-6 shadow-xl border border-white/10 h-[72px]">
+    <div class="pointer-events-auto w-full max-w-[1140px] flex items-center justify-between bg-[#F8F5F2]/95 dark:bg-[#2E4238]/95 backdrop-blur-xl rounded-full px-4 sm:px-6 shadow-xl border border-[#D9D2CA] dark:border-[#26382F] h-[72px]">
       <div class="flex items-center gap-4 sm:gap-8 pl-2">
         <a class="flex items-center gap-3" href="#" title="Downloda Home">
-          <!-- Dynamically swapped logo image -->
-          <img id="nav-logo" src="logos/LightDwldrLogo.png" alt="Downloda Brand Logo" class="w-8 h-8 rounded-xl shadow-md border border-white/10 transition-all duration-300" />
-          <span class="font-display font-extrabold text-white text-lg tracking-tight hover:text-accent transition-colors hidden sm:inline-block">Downloda</span>
+          
+          <img id="nav-logo" src="logos/logo.png" alt="Downloda Brand Logo" class="w-8 h-8 rounded-xl shadow-md border border-slate-200/80 dark:border-white/10 transition-all duration-300" />
+          <span class="font-display font-extrabold text-[#385144] dark:text-[#F8F5F2] text-lg tracking-tight hover:opacity-70 transition-opacity hidden sm:inline-block">Downloda</span>
         </a>
-        <nav class="hidden lg:flex items-center gap-6 pl-6 border-l border-white/10">
-          <a class="font-sans text-[11px] font-bold uppercase tracking-wider text-white/70 hover:text-white transition-colors" href="#the-friction">The Friction</a>
-          <a class="font-sans text-[11px] font-bold uppercase tracking-wider text-white/70 hover:text-white transition-colors" href="#the-simulator">Live Demo</a>
-          <a class="font-sans text-[11px] font-bold uppercase tracking-wider text-white/70 hover:text-white transition-colors" href="#features">Features</a>
-          <a class="font-sans text-[11px] font-bold uppercase tracking-wider text-white/70 hover:text-white transition-colors" href="#manifesto">Manifesto</a>
-          <a class="font-sans text-[11px] font-bold uppercase tracking-wider text-white/70 hover:text-white transition-colors" href="#why-i-built-it">Developer</a>
-          <a class="font-sans text-[11px] font-bold uppercase tracking-wider text-white/70 hover:text-white transition-colors" href="#download-center">Downloads</a>
+        <nav class="hidden lg:flex items-center gap-6 pl-6 border-l border-[#D9D2CA] dark:border-[#26382F]">
+          <a class="font-sans text-[11px] font-bold uppercase tracking-wider text-[#385144]/80 hover:text-[#385144] dark:text-[#F8F5F2]/70 dark:hover:text-[#F8F5F2] transition-colors" href="#the-friction">The Friction</a>
+          <a class="font-sans text-[11px] font-bold uppercase tracking-wider text-[#385144]/80 hover:text-[#385144] dark:text-[#F8F5F2]/70 dark:hover:text-[#F8F5F2] transition-colors" href="#the-simulator">Live Demo</a>
+          <a class="font-sans text-[11px] font-bold uppercase tracking-wider text-[#385144]/80 hover:text-[#385144] dark:text-[#F8F5F2]/70 dark:hover:text-[#F8F5F2] transition-colors" href="#features">Features</a>
+          <a class="font-sans text-[11px] font-bold uppercase tracking-wider text-[#385144]/80 hover:text-[#385144] dark:text-[#F8F5F2]/70 dark:hover:text-[#F8F5F2] transition-colors" href="#manifesto">Manifesto</a>
+          <a class="font-sans text-[11px] font-bold uppercase tracking-wider text-[#385144]/80 hover:text-[#385144] dark:text-[#F8F5F2]/70 dark:hover:text-[#F8F5F2] transition-colors" href="#why-i-built-it">Developer</a>
+          <a class="font-sans text-[11px] font-bold uppercase tracking-wider text-[#385144]/80 hover:text-[#385144] dark:text-[#F8F5F2]/70 dark:hover:text-[#F8F5F2] transition-colors" href="#download-center">Downloads</a>
         </nav>
       </div>
       
       <div class="flex items-center gap-2 sm:gap-4">
-        <!-- Premium Theme Toggle Button -->
-        <button id="theme-toggle-btn" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center shrink-0 border border-white/10 transition-colors pointer-events-auto select-none" title="Toggle color scheme">
+        
+        <button id="theme-toggle-btn" class="w-10 h-10 rounded-full bg-[#EDE8E3] dark:bg-[#26382F] hover:bg-[#D9D2CA] dark:hover:bg-[#1E2E25] text-[#385144] dark:text-[#F8F5F2] flex items-center justify-center shrink-0 border border-[#D9D2CA] dark:border-[#26382F] transition-colors pointer-events-auto select-none" title="Toggle color scheme">
           <span id="theme-toggle-icon" class="material-symbols-outlined text-[20px]">light_mode</span>
         </button>
 
-        <a href="#download-center" class="bg-white hover:bg-white/90 text-black font-sans font-bold rounded-full transition-all duration-300 shrink-0 flex items-center px-4 sm:px-6 text-[10px] sm:text-[10.5px] h-[38px] sm:h-[42px] uppercase tracking-widest shadow-sm pointer-events-auto">
+        <a href="#download-center" class="bg-[#385144] hover:bg-[#2E4238] text-[#F8F5F2] dark:bg-[#F8F5F2] dark:hover:bg-[#EDE8E3] dark:text-[#385144] font-sans font-bold rounded-full transition-all duration-300 shrink-0 flex items-center px-4 sm:px-6 text-[10px] sm:text-[10.5px] h-[38px] sm:h-[42px] uppercase tracking-widest shadow-sm pointer-events-auto">
           <span class="hidden xs:inline">Get Downloda APK</span><span class="xs:hidden">Get APK</span>
         </a>
       </div>
@@ -363,38 +371,37 @@
   </header>
 
   <main>
-    <!-- 2. Hero Section (SEO/GEO Keyword-rich H1 tags) -->
+    
     <section class="pt-[180px] md:pt-[220px] px-6 max-w-[1400px] mx-auto flex flex-col items-center text-center relative bg-page-bg pb-[80px] transition-colors duration-300">
-      <!-- Background Ambient Glows -->
-      <div class="absolute top-[10%] left-[50%] -translate-x-[50%] w-[500px] h-[500px] bg-accent/5 rounded-full blur-[140px] pointer-events-none z-0"></div>
-      <div class="absolute top-[25%] left-[40%] w-[400px] h-[400px] bg-accent-dim/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
+      
+      <div class="absolute top-[10%] left-[50%] -translate-x-[50%] w-[500px] h-[500px] bg-[#385144]/5 dark:bg-[#F8F5F2]/5 rounded-full blur-[140px] pointer-events-none z-0"></div>
+      <div class="absolute top-[25%] left-[40%] w-[400px] h-[400px] bg-[#385144]/10 dark:bg-[#F8F5F2]/10 rounded-full blur-[120px] pointer-events-none z-0"></div>
 
-      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-soft-card/50 border border-line mb-6 animate-fade-in shadow-sm relative z-10">
-        <span class="w-2.5 h-2.5 rounded-full bg-accent animate-pulse"></span>
-        <span class="font-display text-[10px] font-bold text-text uppercase tracking-widest">100% Free • Tracker-Free • Open-Source</span>
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#385144]/5 dark:bg-[#F8F5F2]/5 border border-[#385144]/20 dark:border-[#F8F5F2]/20 mb-6 animate-fade-in shadow-sm relative z-10">
+        <span class="w-2.5 h-2.5 rounded-full bg-[#385144] dark:bg-[#F8F5F2] animate-pulse"></span>
+        <span class="font-display text-[10px] font-bold text-[#385144] dark:text-[#F8F5F2] uppercase tracking-widest">100% Free • Tracker-Free • Open-Source</span>
       </div>
       
-      <h1 class="font-display text-[32px] xs:text-[40px] sm:text-[56px] md:text-[72px] lg:text-[84px] font-extrabold text-balance max-w-5xl leading-[1.1] tracking-tight text-text mb-8 relative z-10">
-        <span class="block text-sm font-extrabold uppercase tracking-[0.2em] text-accent mb-4">Downloda for Android</span>
-        Keep scrolling.<br><span class="bg-gradient-to-r from-accent to-brand-pink bg-clip-text text-transparent">We'll handle the download.</span>
+      <h1 class="font-display text-[32px] xs:text-[40px] sm:text-[56px] md:text-[72px] lg:text-[84px] font-extrabold text-balance max-w-5xl leading-[1.1] tracking-tight text-[#385144] dark:text-[#F8F5F2] mb-8 relative z-10">
+        <span class="block text-sm font-extrabold uppercase tracking-[0.2em] text-[#385144] dark:text-[#F8F5F2] mb-4">Downloda for Android</span>
+        Keep scrolling.<br><span class="text-[#385144] dark:text-[#F8F5F2]">We'll handle the download.</span>
       </h1>
       
-      <p class="font-sans text-[16px] md:text-[20px] text-muted max-w-3xl mb-12 leading-relaxed relative z-10">
+      <p class="font-sans text-[16px] md:text-[20px] text-[#385144]/80 dark:text-[#F8F5F2]/80 max-w-3xl mb-12 leading-relaxed relative z-10">
         Downloda is a simple, ad-free Android tool that lets you save videos from social media without leaving your feed. Just tap share, choose Downloda, and keep scrolling. Your video downloads quietly in the background in full high definition.
       </p>
       
       <div class="flex flex-col sm:flex-row gap-4 mb-20 relative z-10">
-        <a href="#download-center" class="bg-black hover:bg-black/95 text-white font-sans font-extrabold rounded-full transition-all duration-300 flex items-center justify-center px-8 py-4 text-[11px] uppercase tracking-widest shadow-lg hover:scale-[1.03]" title="Go to secure download center">
+        <a href="#download-center" class="bg-[#385144] hover:opacity-90 text-[#F8F5F2] dark:bg-[#F8F5F2] dark:hover:opacity-90 dark:text-[#385144] font-sans font-extrabold rounded-full transition-all duration-300 flex items-center justify-center px-8 py-4 text-[11px] uppercase tracking-widest shadow-lg hover:scale-[1.03]" title="Go to secure download center">
           Get the Latest APK
         </a>
-        <a href="https://github.com/munier-ie/Downloda" target="_blank" class="bg-panel-bg hover:bg-soft-card border border-line text-text font-sans font-extrabold rounded-full transition-all duration-300 flex items-center justify-center px-8 py-4 text-[11px] uppercase tracking-widest hover:scale-[1.03] shadow-sm" title="View Downloda source code on GitHub">
+        <a href="https://github.com/munier-ie/Downloda" target="_blank" class="bg-transparent border border-[#385144] text-[#385144] hover:bg-[#385144]/10 dark:border-[#F8F5F2] dark:text-[#F8F5F2] dark:hover:bg-[#F8F5F2]/10 font-sans font-extrabold rounded-full transition-all duration-300 flex items-center justify-center px-8 py-4 text-[11px] uppercase tracking-widest hover:scale-[1.03] shadow-sm" title="View Downloda source code on GitHub">
           View Downloda on GitHub
         </a>
       </div>
     </section>
 
-    <!-- 3. The Flow Friction Comparison Section -->
-    <section id="the-friction" class="py-[100px] px-6 max-w-[1400px] mx-auto border-t border-line bg-page-bg relative z-10 transition-colors duration-300">
+    <section id="the-friction" class="py-[100px] px-[15%] max-w-[1400px] mx-auto border-t border-line bg-page-bg relative z-10 transition-colors duration-300">
       <div class="text-center mb-16">
         <span class="font-display text-[11px] font-bold text-accent uppercase tracking-widest mb-3 block">Flow Anatomy</span>
         <h2 class="font-display text-3xl md:text-5xl font-extrabold text-text tracking-tight">The Downloda Workflow Difference</h2>
@@ -404,106 +411,101 @@
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        <!-- The Left Column: Traditional Flow -->
+        
         <div class="bg-soft-card/30 border border-line rounded-3xl p-5 sm:p-8 relative overflow-hidden flex flex-col justify-between transition-colors duration-300">
-          <div class="absolute -top-10 -left-10 w-32 h-32 bg-red-500/[0.03] rounded-full blur-2xl"></div>
+          <div class="absolute -top-10 -left-10 w-32 h-32 bg-muted/[0.03] rounded-full blur-2xl"></div>
           <div>
             <div class="flex items-center justify-between mb-8 pb-4 border-b border-line">
-              <span class="font-display font-extrabold text-sm text-red-500/80 tracking-wider uppercase">Traditional Media Downloaders</span>
-              <span class="px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 font-display text-[9px] font-bold text-red-500 tracking-widest uppercase">7 Steps • High Friction</span>
+              <span class="font-display font-extrabold text-sm text-muted tracking-wider uppercase">Traditional Media Downloaders</span>
+              <span class="px-3 py-1 rounded-full bg-soft-card border border-line font-display text-[9px] font-bold text-muted tracking-widest uppercase">7 Steps • High Friction</span>
             </div>
 
-            <!-- Vertical Timeline for Traditional -->
             <div class="space-y-6 relative pl-8 border-l border-line ml-3">
               <div class="relative">
-                <span class="absolute -left-[41px] top-1 w-5 h-5 rounded-full bg-red-500/10 border-2 border-red-500 flex items-center justify-center font-sans text-[10px] font-bold text-red-500">1</span>
+                <span class="absolute -left-[41px] top-1 w-5 h-5 rounded-full bg-soft-card border-2 border-line flex items-center justify-center font-sans text-[10px] font-bold text-muted">1</span>
                 <h3 class="font-display text-sm font-bold text-text mb-1">Scroll Feed</h3>
                 <p class="font-sans text-xs text-muted">You are happily scrolling on TikTok, YouTube, or X and spot a video you want.</p>
               </div>
               <div class="relative">
-                <span class="absolute -left-[41px] top-1 w-5 h-5 rounded-full bg-red-500/10 border-2 border-red-500 flex items-center justify-center font-sans text-[10px] font-bold text-red-500">2</span>
+                <span class="absolute -left-[41px] top-1 w-5 h-5 rounded-full bg-soft-card border-2 border-line flex items-center justify-center font-sans text-[10px] font-bold text-muted">2</span>
                 <h3 class="font-display text-sm font-bold text-text mb-1">Copy the URL</h3>
                 <p class="font-sans text-xs text-muted">Tap share, scroll through social buttons, and click "Copy Link" to clipboard.</p>
               </div>
               <div class="relative">
-                <span class="absolute -left-[41px] top-1 w-5 h-5 rounded-full bg-red-500/10 border-2 border-red-500 flex items-center justify-center font-sans text-[10px] font-bold text-red-500">3</span>
+                <span class="absolute -left-[41px] top-1 w-5 h-5 rounded-full bg-soft-card border-2 border-line flex items-center justify-center font-sans text-[10px] font-bold text-muted">3</span>
                 <h3 class="font-display text-sm font-bold text-text mb-1">Abandon the App</h3>
                 <p class="font-sans text-xs text-muted">Close or minimize your social app, breaking your browsing state and dopamine loop.</p>
               </div>
               <div class="relative">
-                <span class="absolute -left-[41px] top-1 w-5 h-5 rounded-full bg-red-500/10 border-2 border-red-500 flex items-center justify-center font-sans text-[10px] font-bold text-red-500">4</span>
+                <span class="absolute -left-[41px] top-1 w-5 h-5 rounded-full bg-soft-card border-2 border-line flex items-center justify-center font-sans text-[10px] font-bold text-muted">4</span>
                 <h3 class="font-display text-sm font-bold text-text mb-1">Locate Downloader</h3>
                 <p class="font-sans text-xs text-muted">Search through your app drawer or home pages to find the dedicated downloader.</p>
               </div>
               <div class="relative">
-                <span class="absolute -left-[41px] top-1 w-5 h-5 rounded-full bg-red-500/10 border-2 border-red-500 flex items-center justify-center font-sans text-[10px] font-bold text-red-500">5</span>
+                <span class="absolute -left-[41px] top-1 w-5 h-5 rounded-full bg-soft-card border-2 border-line flex items-center justify-center font-sans text-[10px] font-bold text-muted">5</span>
                 <h3 class="font-display text-sm font-bold text-text mb-1">Suffer Ad Bloat</h3>
                 <p class="font-sans text-xs text-muted">Launch the app, wait through a 5-second splash ad, and dismiss trackers.</p>
               </div>
               <div class="relative">
-                <span class="absolute -left-[41px] top-1 w-5 h-5 rounded-full bg-red-500/10 border-2 border-red-500 flex items-center justify-center font-sans text-[10px] font-bold text-red-500">6</span>
+                <span class="absolute -left-[41px] top-1 w-5 h-5 rounded-full bg-soft-card border-2 border-line flex items-center justify-center font-sans text-[10px] font-bold text-muted">6</span>
                 <h3 class="font-display text-sm font-bold text-text mb-1">Paste Link & Mux</h3>
                 <p class="font-sans text-xs text-muted">Paste the copied URL, configure options, select video formats, click download.</p>
               </div>
               <div class="relative">
-                <span class="absolute -left-[41px] top-1 w-5 h-5 rounded-full bg-red-500/10 border-2 border-red-500 flex items-center justify-center font-sans text-[10px] font-bold text-red-500">7</span>
+                <span class="absolute -left-[41px] top-1 w-5 h-5 rounded-full bg-soft-card border-2 border-line flex items-center justify-center font-sans text-[10px] font-bold text-muted">7</span>
                 <h3 class="font-display text-sm font-bold text-text mb-1">Stare at the App</h3>
                 <p class="font-sans text-xs text-muted">Keep the application open in the foreground to avoid system shutdown. Frustrated user.</p>
               </div>
             </div>
           </div>
           <div class="mt-8 pt-4 border-t border-line text-center">
-            <span class="text-xs text-red-500 font-sans font-bold">❌ Disrupts browsing state and wastes screen time.</span>
+            <span class="text-xs text-muted font-sans font-bold">❌ Disrupts browsing state and wastes screen time.</span>
           </div>
         </div>
 
-        <!-- The Right Column: Downloda Flow -->
         <div class="bg-panel-bg border border-line rounded-3xl p-5 sm:p-8 relative overflow-hidden flex flex-col justify-between shadow-xl bg-gradient-to-b from-panel-bg to-soft-card/30 transition-all duration-300">
           <div class="absolute -top-10 -right-10 w-32 h-32 bg-accent/[0.04] rounded-full blur-2xl"></div>
           <div>
             <div class="flex items-center justify-between mb-8 pb-4 border-b border-line">
-              <span class="font-display font-extrabold text-sm text-emerald-600 tracking-wider uppercase">The Downloda Way</span>
-              <span class="px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 font-display text-[9px] font-bold text-emerald-600 tracking-widest uppercase">2 Steps • Zero Friction</span>
+              <span class="font-display font-extrabold text-sm text-accent tracking-wider uppercase">The Downloda Way</span>
+              <span class="px-3 py-1 rounded-full bg-accent-dim border border-accent/20 font-display text-[9px] font-bold text-accent tracking-widest uppercase">2 Steps • Zero Friction</span>
             </div>
 
-            <!-- Vertical Timeline for Downloda -->
-            <div class="space-y-12 relative pl-8 border-l border-emerald-500/30 ml-3 py-2">
+            <div class="space-y-12 relative pl-8 border-l border-accent/20 ml-3 py-2">
               <div class="relative">
-                <span class="absolute -left-[41px] top-1 w-5 h-5 rounded-full bg-emerald-500/10 border-2 border-emerald-500 flex items-center justify-center font-sans text-[10px] font-bold text-emerald-600">1</span>
+                <span class="absolute -left-[41px] top-1 w-5 h-5 rounded-full bg-accent-dim border-2 border-accent flex items-center justify-center font-sans text-[10px] font-bold text-accent">1</span>
                 <h3 class="font-display text-base font-extrabold text-text mb-1">Tap Share ➔ Downloda</h3>
                 <p class="font-sans text-sm text-muted">While scrolling, tap the video's share button and select **Downloda** directly from your system share sheet.</p>
               </div>
               <div class="relative">
-                <span class="absolute -left-[41px] top-1 w-5 h-5 rounded-full bg-emerald-500/10 border-2 border-emerald-500 flex items-center justify-center font-sans text-[10px] font-bold text-emerald-600">2</span>
+                <span class="absolute -left-[41px] top-1 w-5 h-5 rounded-full bg-accent-dim border-2 border-accent flex items-center justify-center font-sans text-[10px] font-bold text-accent">2</span>
                 <h3 class="font-display text-base font-extrabold text-text mb-1">Keep Scrolling (Done!)</h3>
                 <p class="font-sans text-sm text-muted">Your video immediately starts downloading and saving to your gallery quietly in the background. You never leave your social feed. Scroll free!</p>
               </div>
             </div>
 
-            <!-- Graphic Display of Muxing in background -->
             <div class="mt-10 bg-soft-card/40 border border-line rounded-2xl p-4 flex items-center gap-4 transition-colors duration-300">
-              <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-accent to-brand-pink flex items-center justify-center shrink-0">
+              <div class="w-10 h-10 rounded-xl bg-accent flex items-center justify-center shrink-0">
                 <span class="material-symbols-outlined text-white text-md">done_all</span>
               </div>
               <div class="flex-1 min-w-0">
                 <span class="font-display text-[9px] font-bold text-accent uppercase tracking-wider block">Background Service</span>
                 <span class="font-sans text-xs text-text block truncate font-semibold">Video downloaded and saved to gallery in high definition!</span>
               </div>
-              <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-600 font-display text-[8px] font-bold tracking-widest uppercase">Saved</span>
+              <span class="px-2 py-0.5 rounded bg-accent-dim text-accent font-display text-[8px] font-bold tracking-widest uppercase">Saved</span>
             </div>
           </div>
 
           <div class="mt-8 pt-4 border-t border-line text-center">
-            <span class="text-xs text-emerald-600 font-sans font-bold">✨ Infinite scrolling maintained. Zero context switching.</span>
+            <span class="text-xs text-accent font-sans font-bold">✨ Infinite scrolling maintained. Zero context switching.</span>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 4. Interactive Phone Simulator Section -->
-    <section id="the-simulator" class="py-[120px] px-6 max-w-[1400px] mx-auto border-t border-line bg-page-bg relative transition-colors duration-300">
+    <section id="the-simulator" class="py-[120px] px-[15%] max-w-[1400px] mx-auto border-t border-line bg-page-bg relative transition-colors duration-300">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-        <!-- Interactive Details Panel -->
+        
         <div class="lg:col-span-5 flex flex-col justify-center">
           <span class="font-display text-[11px] font-bold text-accent uppercase tracking-widest mb-3">Interactive Demo</span>
           <h2 class="font-display text-3xl md:text-5xl font-extrabold text-text tracking-tight mb-6">Experience Zero-Friction in Real-Time</h2>
@@ -521,7 +523,7 @@
             </button>
 
             <button onclick="triggerSimStep(2)" id="sim-btn-2" class="w-full text-left p-4 rounded-2xl bg-panel-bg border border-line hover:border-text hover:bg-soft-card/30 text-text transition-all flex items-start gap-4 opacity-50 cursor-not-allowed shadow-sm pointer-events-auto" disabled>
-              <span class="w-6 h-6 rounded-full bg-brand-pink/10 border border-brand-pink/20 font-display text-xs font-bold text-brand-pink flex items-center justify-center shrink-0 mt-0.5">2</span>
+              <span class="w-6 h-6 rounded-full bg-accent/10 border border-accent/20 font-display text-xs font-bold text-accent flex items-center justify-center shrink-0 mt-0.5">2</span>
               <div>
                 <h3 class="font-display text-sm font-bold text-text mb-0.5">Selecting "Downloda"</h3>
                 <p class="font-sans text-xs text-muted">Instantly calls the Downloda Share target sheet without opening any loader apps.</p>
@@ -529,7 +531,7 @@
             </button>
 
             <button onclick="triggerSimStep(3)" id="sim-btn-3" class="w-full text-left p-4 rounded-2xl bg-panel-bg border border-line hover:border-text hover:bg-soft-card/30 text-text transition-all flex items-start gap-4 opacity-50 cursor-not-allowed shadow-sm pointer-events-auto" disabled>
-              <span class="w-6 h-6 rounded-full bg-emerald-500/10 border border-emerald-500/20 font-display text-xs font-bold text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">3</span>
+              <span class="w-6 h-6 rounded-full bg-accent-dim border border-accent/20 font-display text-xs font-bold text-accent flex items-center justify-center shrink-0 mt-0.5">3</span>
               <div>
                 <h3 class="font-display text-sm font-bold text-text mb-0.5">Scroll Free & Mux</h3>
                 <p class="font-sans text-xs text-muted">Watch the notification drawer show the progress bar while you keep browsing.</p>
@@ -542,25 +544,20 @@
           </button>
         </div>
 
-        <!-- Phone Shell Container -->
         <div class="lg:col-span-7 flex justify-center relative">
-          <!-- Ambient Glow for Phone -->
-          <div class="absolute w-[350px] h-[350px] bg-accent/[0.04] rounded-full blur-[100px] pointer-events-none"></div>
           
-          <!-- Outer Phone Frame (Android Style, dark-bodied for realism) -->
+          <div class="absolute w-[350px] h-[350px] bg-accent/[0.04] rounded-full blur-[100px] pointer-events-none"></div>
+
           <div class="w-[310px] h-[610px] bg-[#1a1c24] rounded-[48px] p-3 shadow-[0_24px_80px_rgba(0,0,0,0.4)] border border-white/10 relative overflow-hidden flex flex-col">
-            <!-- Camera Punch-Hole -->
-            <div class="absolute top-4 left-[50%] -translate-x-[50%] w-3.5 h-3.5 bg-black rounded-full z-40 border border-white/5"></div>
             
-            <!-- Side buttons -->
+            <div class="absolute top-4 left-[50%] -translate-x-[50%] w-3.5 h-3.5 bg-black rounded-full z-40 border border-white/5"></div>
+
             <div class="absolute right-[-2px] top-24 w-1 h-14 bg-white/20 rounded-l"></div>
             <div class="absolute right-[-2px] top-44 w-1 h-10 bg-white/20 rounded-l"></div>
 
-            <!-- Phone Screen -->
-            <div class="w-full h-full bg-[#08080C] rounded-[38px] relative overflow-hidden flex flex-col border border-black z-30 select-none">
-              
-              <!-- Status Bar -->
-              <div class="h-8 bg-black/60 backdrop-blur-md px-5 flex items-center justify-between text-[10px] font-sans text-white/80 z-40 shrink-0">
+            <div class="w-full h-full bg-sim-bg rounded-[38px] relative overflow-hidden flex flex-col border border-black z-30 select-none transition-colors duration-300">
+
+              <div class="h-8 bg-sim-statusbar-bg backdrop-blur-md px-5 flex items-center justify-between text-[10px] font-sans text-sim-text z-40 shrink-0 transition-colors duration-300">
                 <span class="font-bold">18:49</span>
                 <div class="flex items-center gap-1.5">
                   <span class="material-symbols-outlined text-[12px]">signal_cellular_4_bar</span>
@@ -569,76 +566,73 @@
                 </div>
               </div>
 
-              <!-- Foreground Downloda System Notification Pull-down -->
-              <div id="sim-notif-drawer" class="absolute top-8 left-2 right-2 bg-slate-900/95 backdrop-blur-xl border border-white/10 rounded-2xl p-3 shadow-xl transform -translate-y-[150%] transition-transform duration-500 z-50 flex flex-col">
+              <div id="sim-notif-drawer" class="absolute top-8 left-2 right-2 bg-sim-share-bg/95 backdrop-blur-xl border border-sim-line rounded-2xl p-3 shadow-xl transform -translate-y-[150%] transition-transform duration-500 z-50 flex flex-col">
                 <div class="flex items-center justify-between mb-2">
                   <div class="flex items-center gap-2">
-                    <img src="logos/LightDwldrLogo.png" alt="Downloda Notification Logo" class="w-4.5 h-4.5 rounded" style="width: 18px; height: 18px;" />
-                    <span class="font-display text-[9px] font-extrabold text-white uppercase tracking-wider">Downloda Service</span>
+                    <img src="logos/logo.png" alt="Downloda Notification Logo" class="w-4.5 h-4.5 rounded" style="width: 18px; height: 18px;" />
+                    <span class="font-display text-[9px] font-extrabold text-sim-text uppercase tracking-wider">Downloda Service</span>
                   </div>
-                  <span class="text-[8px] text-muted">Active</span>
+                  <span class="text-[8px] text-sim-muted">Active</span>
                 </div>
                 <div class="mb-1.5 flex items-center justify-between text-[10px]">
-                  <span class="font-display font-semibold text-white truncate max-w-[150px]">Cooking_Delight_1080p.mp4</span>
+                  <span class="font-display font-semibold text-sim-text truncate max-w-[150px]">Cooking_Delight_1080p.mp4</span>
                   <span id="sim-notif-pct" class="font-bold text-accent">0%</span>
                 </div>
-                <!-- Mini progress bar -->
-                <div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden mb-1 relative">
-                  <div id="sim-notif-bar" class="h-full bg-gradient-to-r from-accent to-brand-pink w-[0%] transition-all duration-300"></div>
+                
+                <div class="w-full bg-sim-text/10 h-1.5 rounded-full overflow-hidden mb-1 relative">
+                  <div id="sim-notif-bar" class="h-full bg-accent w-[0%] transition-all duration-300"></div>
                 </div>
-                <div class="flex justify-between text-[8px] text-muted font-sans">
+                <div class="flex justify-between text-[8px] text-sim-muted font-sans">
                   <span id="sim-notif-speed">Preparing isolates...</span>
                   <span>Background execution</span>
                 </div>
               </div>
 
-              <!-- Main Mock App Feed Window -->
               <div id="sim-feed-container" class="flex-1 overflow-y-auto relative flex flex-col scroll-smooth">
-                <!-- Mock Post 1 -->
-                <div id="sim-post-1" class="w-full border-b border-white/5 py-4 px-4 flex flex-col gap-3">
+                
+                <div id="sim-post-1" class="w-full border-b border-sim-line py-4 px-4 flex flex-col gap-3">
                   <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-accent to-brand-pink flex items-center justify-center text-white font-display text-xs font-bold" role="img" aria-label="Munier Profile Avatar">M</div>
+                    <div class="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-white font-display text-xs font-bold" role="img" aria-label="Munier Profile Avatar">M</div>
                     <div>
-                      <span class="text-xs font-bold text-white block">munier_ie</span>
-                      <span class="text-[9px] text-muted block">2 hours ago • Dublin, Ireland</span>
+                      <span class="text-xs font-bold text-sim-text block">munier_ie</span>
+                      <span class="text-[9px] text-sim-muted block">2 hours ago • Dublin, Ireland</span>
                     </div>
                   </div>
-                  <!-- Post Video Mockup -->
+                  
                   <div class="w-full h-[180px] bg-slate-800 rounded-xl relative overflow-hidden flex flex-col justify-center items-center">
                     <div class="absolute inset-0 bg-cover bg-center opacity-70 filter brightness-75 animate-pulse" role="img" aria-label="Food Cooking Video Post" style="background-image: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=400&q=80');"></div>
-                    <!-- Play Overlay -->
+                    
                     <span class="material-symbols-outlined text-white text-4xl relative z-10 opacity-80 filter drop-shadow">play_circle</span>
                     <span class="absolute bottom-2 left-2 bg-black/60 backdrop-blur px-2 py-0.5 rounded text-[8px] font-bold text-white z-10 tracking-widest uppercase">Foodie Feed</span>
                   </div>
-                  <!-- Post text -->
-                  <p class="text-[11px] text-white/95 leading-relaxed">
+                  
+                  <p class="text-[11px] text-sim-text leading-relaxed">
                     Finally finished the new version of Downloda! Downloads work completely offline, saving videos directly to your phone. It's incredibly fast, private, and works right from your share menu. 🚀 #Android #AppDesign
                   </p>
-                  <!-- Post Buttons -->
-                  <div class="flex items-center justify-between border-t border-white/[0.03] pt-3 text-muted">
-                    <button class="flex items-center gap-1.5 hover:text-white transition-colors" title="Like post">
+                  
+                  <div class="flex items-center justify-between border-t border-sim-line pt-3 text-sim-muted">
+                    <button class="flex items-center gap-1.5 hover:text-sim-text transition-colors" title="Like post">
                       <span class="material-symbols-outlined text-[16px]">favorite</span>
                       <span class="text-[10px] font-bold">1.2k</span>
                     </button>
-                    <button class="flex items-center gap-1.5 hover:text-white transition-colors" title="View comments">
+                    <button class="flex items-center gap-1.5 hover:text-sim-text transition-colors" title="View comments">
                       <span class="material-symbols-outlined text-[16px]">chat_bubble</span>
                       <span class="text-[10px] font-bold">84</span>
                     </button>
-                    <!-- Share Button (Tapped in step 1) -->
-                    <button id="sim-share-btn" onclick="simTriggerShare()" class="flex items-center gap-1.5 text-white/95 hover:text-accent transition-colors px-3 py-1 rounded-full bg-white/5 border border-white/5 animate-pulse" title="Share and download video">
+                    
+                    <button id="sim-share-btn" onclick="simTriggerShare()" class="flex items-center gap-1.5 text-sim-text hover:text-accent transition-colors px-3 py-1 rounded-full bg-sim-line border border-sim-border animate-pulse" title="Share and download video">
                       <span class="material-symbols-outlined text-[16px] text-accent">share</span>
                       <span class="text-[10px] font-extrabold uppercase tracking-wide">Share Video</span>
                     </button>
                   </div>
                 </div>
 
-                <!-- Mock Post 2 -->
-                <div id="sim-post-2" class="w-full border-b border-white/5 py-6 px-4 flex flex-col gap-3">
+                <div id="sim-post-2" class="w-full border-b border-sim-line py-6 px-4 flex flex-col gap-3">
                   <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center text-white font-display text-xs font-bold" role="img" aria-label="Travel Enthusiast Avatar">T</div>
+                    <div class="w-8 h-8 rounded-full bg-accent-dim border border-accent/20 flex items-center justify-center text-text font-display text-xs font-bold" role="img" aria-label="Travel Enthusiast Avatar">T</div>
                     <div>
-                      <span class="text-xs font-bold text-white block">travel_enthusiast</span>
-                      <span class="text-[9px] text-muted block">5 hours ago • Alps, Switzerland</span>
+                      <span class="text-xs font-bold text-sim-text block">travel_enthusiast</span>
+                      <span class="text-[9px] text-sim-muted block">5 hours ago • Alps, Switzerland</span>
                     </div>
                   </div>
                   <div class="w-full h-[180px] bg-slate-800 rounded-xl relative overflow-hidden flex flex-col justify-center items-center">
@@ -646,19 +640,19 @@
                     <span class="material-symbols-outlined text-white text-4xl relative z-10 opacity-80 filter drop-shadow">play_circle</span>
                     <span class="absolute bottom-2 left-2 bg-black/60 backdrop-blur px-2 py-0.5 rounded text-[8px] font-bold text-white z-10 tracking-widest uppercase">Wanderlust</span>
                   </div>
-                  <p class="text-[11px] text-white/95 leading-relaxed">
+                  <p class="text-[11px] text-sim-text leading-relaxed">
                     Staring at this pristine horizon for an hour. Offline downloads are beautiful when you have zero network connections on mountain paths! ⛰️
                   </p>
-                  <div class="flex items-center justify-between border-t border-white/[0.03] pt-3 text-muted">
-                    <button class="flex items-center gap-1.5 hover:text-white transition-colors" title="Like post">
+                  <div class="flex items-center justify-between border-t border-sim-line pt-3 text-sim-muted">
+                    <button class="flex items-center gap-1.5 hover:text-sim-text transition-colors" title="Like post">
                       <span class="material-symbols-outlined text-[16px]">favorite</span>
                       <span class="text-[10px] font-bold">2.4k</span>
                     </button>
-                    <button class="flex items-center gap-1.5 hover:text-white transition-colors" title="View comments">
+                    <button class="flex items-center gap-1.5 hover:text-sim-text transition-colors" title="View comments">
                       <span class="material-symbols-outlined text-[16px]">chat_bubble</span>
                       <span class="text-[10px] font-bold">142</span>
                     </button>
-                    <button class="flex items-center gap-1.5 hover:text-white transition-colors" title="Share post">
+                    <button class="flex items-center gap-1.5 hover:text-sim-text transition-colors" title="Share post">
                       <span class="material-symbols-outlined text-[16px]">share</span>
                       <span class="text-[10px] font-bold">Share</span>
                     </button>
@@ -666,46 +660,42 @@
                 </div>
               </div>
 
-              <!-- Mock Android Share Sheet (Slides up on step 1) -->
-              <div id="sim-share-sheet" class="absolute bottom-0 left-0 right-0 bg-[#12141C] border-t border-white/10 rounded-t-[28px] p-5 shadow-2xl z-40 transform translate-y-full transition-transform duration-300 flex flex-col">
-                <div class="w-10 bg-white/20 h-1 rounded-full self-center mb-4"></div>
-                <span class="font-display text-[9px] font-extrabold text-muted uppercase tracking-widest mb-4">Share Video via</span>
-                
-                <!-- Share Options Grid -->
+              <div id="sim-share-sheet" class="absolute bottom-0 left-0 right-0 bg-sim-share-bg border-t border-sim-border rounded-t-[28px] p-5 shadow-2xl z-40 transform translate-y-full transition-transform duration-300 flex flex-col">
+                <div class="w-10 bg-sim-text/10 h-1 rounded-full self-center mb-4"></div>
+                <span class="font-display text-[9px] font-extrabold text-sim-muted uppercase tracking-widest mb-4">Share Video via</span>
+
                 <div class="grid grid-cols-4 gap-y-4 gap-x-2 text-center pb-4">
                   <div class="flex flex-col items-center gap-1.5 opacity-40">
-                    <div class="w-11 h-11 rounded-full bg-white/5 border border-white/5 flex items-center justify-center">
-                      <span class="material-symbols-outlined text-white text-lg">content_copy</span>
+                    <div class="w-11 h-11 rounded-full bg-sim-line border border-sim-border flex items-center justify-center">
+                      <span class="material-symbols-outlined text-sim-text text-lg">content_copy</span>
                     </div>
-                    <span class="font-sans text-[9px] text-white/70">Copy link</span>
+                    <span class="font-sans text-[9px] text-sim-text/70">Copy link</span>
                   </div>
                   <div class="flex flex-col items-center gap-1.5 opacity-40">
-                    <div class="w-11 h-11 rounded-full bg-emerald-600/10 border border-emerald-600/20 flex items-center justify-center">
-                      <span class="material-symbols-outlined text-emerald-400 text-lg">chat</span>
+                    <div class="w-11 h-11 rounded-full bg-sim-line border border-sim-border flex items-center justify-center">
+                      <span class="material-symbols-outlined text-sim-muted text-lg">chat</span>
                     </div>
-                    <span class="font-sans text-[9px] text-white/70">WhatsApp</span>
+                    <span class="font-sans text-[9px] text-sim-text/70">WhatsApp</span>
                   </div>
 
-                  <!-- Downloda Target! -->
                   <button onclick="simClickDownloda()" class="flex flex-col items-center gap-1.5 group select-none relative focus:outline-none" title="Select Downloda from share sheet">
-                    <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-accent to-brand-pink flex items-center justify-center shadow-lg border border-white/10 transform active:scale-95 group-hover:scale-105 transition-all animate-bounce">
-                      <img src="logos/LightDwldrLogo.png" alt="Downloda Share Target" style="width: 26px; height: 26px;" />
+                    <div class="w-11 h-11 rounded-xl bg-accent flex items-center justify-center shadow-lg border border-white/10 transform active:scale-95 group-hover:scale-105 transition-all animate-bounce">
+                      <img src="logos/logo.png" alt="Downloda Share Target" style="width: 26px; height: 26px;" />
                     </div>
-                    <span class="font-sans text-[9px] font-extrabold text-white group-hover:text-accent transition-colors">Downloda</span>
-                    <span class="absolute -top-1 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-[#12141C] animate-ping"></span>
+                    <span class="font-sans text-[9px] font-extrabold text-sim-text group-hover:text-accent transition-colors">Downloda</span>
+                    <span class="absolute -top-1 right-0 w-2.5 h-2.5 bg-accent rounded-full border-2 border-sim-share-bg animate-ping"></span>
                   </button>
 
                   <div class="flex flex-col items-center gap-1.5 opacity-40">
-                    <div class="w-11 h-11 rounded-full bg-blue-600/10 border border-blue-600/20 flex items-center justify-center">
-                      <span class="material-symbols-outlined text-blue-400 text-lg">sms</span>
+                    <div class="w-11 h-11 rounded-full bg-sim-line border border-sim-border flex items-center justify-center">
+                      <span class="material-symbols-outlined text-sim-muted text-lg">sms</span>
                     </div>
-                    <span class="font-sans text-[9px] text-white/70">Messages</span>
+                    <span class="font-sans text-[9px] text-sim-text/70">Messages</span>
                   </div>
                 </div>
               </div>
 
-              <!-- Toast Alert Box inside Phone -->
-              <div id="sim-toast" class="absolute bottom-6 left-[50%] -translate-x-[50%] bg-black/90 backdrop-blur border border-white/10 rounded-full px-4 py-1.5 shadow-lg text-[9px] font-bold text-white tracking-wide uppercase transition-all duration-300 transform scale-0 z-50 flex items-center gap-1.5">
+              <div id="sim-toast" class="absolute bottom-6 left-[50%] -translate-x-[50%] bg-slate-900 border border-slate-800 rounded-full px-4 py-1.5 shadow-lg text-[9px] font-bold text-white tracking-wide uppercase transition-all duration-300 transform scale-0 z-50 flex items-center gap-1.5">
                 <span class="w-1.5 h-1.5 rounded-full bg-accent"></span>
                 <span>Downloda: Background download started...</span>
               </div>
@@ -716,8 +706,7 @@
       </div>
     </section>
 
-    <!-- 5. Features Section (Editorial Split Redesigned via Stitch Layout patterns) -->
-    <section id="features" class="py-[120px] px-6 max-w-[1400px] mx-auto border-t border-line bg-page-bg relative transition-colors duration-300 animate-fade-in">
+    <section id="features" class="py-[120px] px-[15%] max-w-[1400px] mx-auto border-t border-line bg-page-bg relative transition-colors duration-300 animate-fade-in">
       <div class="text-center mb-24">
         <span class="font-display text-[11px] font-bold text-accent uppercase tracking-widest mb-3 block">Feature Architecture</span>
         <h2 class="font-display text-3xl md:text-5xl font-extrabold text-text tracking-tight">Engineered for absolute fluidity: Downloda Background Architecture</h2>
@@ -727,16 +716,16 @@
       </div>
 
       <div class="space-y-[100px]">
-        <!-- Pillar 1: Private Sandbox Isolation -->
+        
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-[60px] lg:gap-[100px] items-center">
-          <!-- Graphic Panel (iPhone 15 Pro Mockup) -->
+          
           <div class="bg-gradient-to-br from-accent/15 to-accent/5 rounded-[32px] md:rounded-[40px] p-6 md:p-8 h-[520px] flex items-center justify-center relative overflow-hidden border border-line shadow-inner">
-            <!-- iPhone 15 Pro Device Frame -->
+            
             <div class="iphone-frame hover:scale-[1.03] duration-500">
               <span class="iphone-island" aria-hidden></span>
               
               <div class="iphone-screen">
-                <!-- Status bar -->
+                
                 <div class="iphone-statusbar">
                   <span class="font-sans font-bold">18:49</span>
                   <div class="flex items-center gap-1">
@@ -746,9 +735,6 @@
                   </div>
                 </div>
 
-                <!-- ─── SCREEN CONTENT REGION ─── -->
-                <!-- USER NOTE: You can completely replace the container below with a single <img> tag for real screenshots:
-                     e.g. <img src="sandbox_screenshot.png" class="w-full h-full object-cover rounded-[32px]" alt="Sandbox Screen"> -->
                 <div class="flex-1 overflow-y-auto px-3 py-4 flex flex-col justify-center gap-3">
                   <div class="bg-panel-bg rounded-2xl shadow border border-line p-4 relative transition-colors duration-300">
                     <div class="flex items-center justify-between mb-4 pb-2 border-b border-line transition-colors">
@@ -764,7 +750,7 @@
                       </div>
                       <div class="flex items-center justify-between p-2 bg-soft-card/40 rounded-lg border border-line transition-colors">
                         <div class="flex items-center gap-1.5 min-w-0">
-                          <span class="material-symbols-outlined text-brand-orange text-[14px]">admin_panel_settings</span>
+                          <span class="material-symbols-outlined text-accent text-[14px]">admin_panel_settings</span>
                           <span class="font-sans font-bold text-text text-[9px] truncate">ZERO TRACKERS OR ADS</span>
                         </div>
                       </div>
@@ -782,7 +768,7 @@
               </div>
             </div>
           </div>
-          <!-- Text Panel -->
+          
           <div class="flex flex-col justify-center max-w-xl">
             <span class="font-display text-[10px] font-bold text-accent uppercase tracking-widest mb-3">01 / 100% PRIVATE & SECURE</span>
             <h2 class="font-display text-2xl md:text-3xl lg:text-4xl font-extrabold text-text leading-tight mb-6">Your videos stay on your phone, nowhere else.</h2>
@@ -803,9 +789,8 @@
           </div>
         </div>
 
-        <!-- Pillar 2: Background Daemon -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-[60px] lg:gap-[100px] items-center">
-          <!-- Text Panel (Order 2 on Mobile, Order 1 on Desktop) -->
+          
           <div class="flex flex-col justify-center max-w-xl order-2 lg:order-1">
             <span class="font-display text-[10px] font-bold text-accent uppercase tracking-widest mb-3">02 / WORKS QUIETLY IN THE BACKGROUND</span>
             <h2 class="font-display text-2xl md:text-3xl lg:text-4xl font-extrabold text-text leading-tight mb-6">Handles your downloads while you keep scrolling.</h2>
@@ -824,14 +809,14 @@
               </li>
             </ul>
           </div>
-          <!-- Graphic Panel (iPhone 15 Pro Mockup) -->
+          
           <div class="bg-gradient-to-br from-accent/15 to-accent/5 rounded-[32px] md:rounded-[40px] p-6 md:p-8 h-[520px] flex items-center justify-center relative overflow-hidden border border-line shadow-inner order-1 lg:order-2">
-            <!-- iPhone 15 Pro Device Frame -->
+            
             <div class="iphone-frame hover:scale-[1.03] duration-500">
               <span class="iphone-island" aria-hidden></span>
               
               <div class="iphone-screen">
-                <!-- Status bar -->
+                
                 <div class="iphone-statusbar">
                   <span class="font-sans font-bold">18:49</span>
                   <div class="flex items-center gap-1">
@@ -841,9 +826,6 @@
                   </div>
                 </div>
 
-                <!-- ─── SCREEN CONTENT REGION ─── -->
-                <!-- USER NOTE: You can completely replace the container below with a single <img> tag for real screenshots:
-                     e.g. <img src="queue_screenshot.png" class="w-full h-full object-cover rounded-[32px]" alt="Active Queue Screen"> -->
                 <div class="flex-1 overflow-y-auto px-3 py-4 flex flex-col justify-center gap-3">
                   <div class="bg-panel-bg rounded-2xl shadow border border-line p-4 relative transition-colors duration-300">
                     <div class="flex items-center justify-between mb-4 pb-2 border-b border-line transition-colors">
@@ -853,14 +835,14 @@
                     <div class="space-y-2">
                       <div class="p-2 bg-soft-card/40 rounded-lg border border-line flex items-center justify-between transition-colors">
                         <div class="flex items-center gap-1.5 min-w-0">
-                          <span class="material-symbols-outlined text-brand-orange text-[14px]">downloading</span>
+                          <span class="material-symbols-outlined text-accent text-[14px]">downloading</span>
                           <span class="font-sans font-bold text-text text-[9px] truncate">Travel_Vlog_HD.mp4</span>
                         </div>
                         <span class="font-sans text-[9px] font-extrabold text-accent">74%</span>
                       </div>
                       <div class="p-2 bg-soft-card/40 rounded-lg border border-line flex items-center justify-between opacity-70 transition-colors">
                         <div class="flex items-center gap-1.5 min-w-0">
-                          <span class="material-symbols-outlined text-brand-pink text-[14px]">schedule</span>
+                          <span class="material-symbols-outlined text-accent text-[14px]">schedule</span>
                           <span class="font-sans font-bold text-text text-[9px] truncate">Dance_Challenge.mp4</span>
                         </div>
                         <span class="font-display text-[7px] font-bold text-muted uppercase tracking-widest">Queued</span>
@@ -882,16 +864,15 @@
           </div>
         </div>
 
-        <!-- Pillar 3: local Muxer -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-[60px] lg:gap-[100px] items-center">
-          <!-- Graphic Panel (iPhone 15 Pro Mockup) -->
+          
           <div class="bg-gradient-to-br from-accent/15 to-accent/5 rounded-[32px] md:rounded-[40px] p-6 md:p-8 h-[520px] flex items-center justify-center relative overflow-hidden border border-line shadow-inner">
-            <!-- iPhone 15 Pro Device Frame -->
+            
             <div class="iphone-frame hover:scale-[1.03] duration-500">
               <span class="iphone-island" aria-hidden></span>
               
               <div class="iphone-screen">
-                <!-- Status bar -->
+                
                 <div class="iphone-statusbar">
                   <span class="font-sans font-bold">18:49</span>
                   <div class="flex items-center gap-1">
@@ -901,26 +882,23 @@
                   </div>
                 </div>
 
-                <!-- ─── SCREEN CONTENT REGION ─── -->
-                <!-- USER NOTE: You can completely replace the container below with a single <img> tag for real screenshots:
-                     e.g. <img src="ffmpeg_screenshot.png" class="w-full h-full object-cover rounded-[32px]" alt="FFmpeg Screen"> -->
                 <div class="flex-1 overflow-y-auto px-3 py-4 flex flex-col justify-center gap-3">
                   <div class="bg-panel-bg rounded-2xl shadow border border-line p-4 relative transition-colors duration-300">
                     <div class="flex items-center justify-between mb-3 pb-2 border-b border-line transition-colors">
                       <span class="font-display font-bold text-[9px] text-text uppercase tracking-wider">AUDIO CONVERTER</span>
                       <span class="material-symbols-outlined text-muted text-[14px]">music_note</span>
                     </div>
-                    <div class="bg-black/90 rounded-xl p-3 font-sans text-[10px] text-white leading-relaxed border border-white/5 shadow-inner mb-3 text-center">
+                    <div class="bg-slate-900 dark:bg-black/90 rounded-xl p-3 font-sans text-[10px] text-white leading-relaxed border border-slate-800 dark:border-white/5 shadow-inner mb-3 text-center">
                       <span class="text-white/60 text-[8px] uppercase tracking-wider block mb-1">Transcoding Status</span>
-                      <span class="text-brand-orange font-bold animate-pulse block">Converting video to MP3...</span>
-                      <span class="text-emerald-400 font-bold block mt-1">✓ Complete! Saved to Music</span>
+                      <span class="text-accent font-bold animate-pulse block">Converting video to MP3...</span>
+                      <span class="text-accent font-bold block mt-1">✓ Complete! Saved to Music</span>
                     </div>
                     <div class="flex justify-between items-center bg-soft-card/40 rounded-lg p-2 border border-line transition-colors">
                       <div class="flex items-center gap-1.5">
                         <span class="material-symbols-outlined text-accent text-[14px]">play_circle</span>
                         <span class="font-sans font-semibold text-text text-[9px]">Play Extracted Song</span>
                       </div>
-                      <span class="px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-600 font-display text-[7px] font-extrabold tracking-widest uppercase">Ready</span>
+                      <span class="px-1.5 py-0.5 rounded bg-accent-dim text-accent font-display text-[7px] font-extrabold tracking-widest uppercase">Ready</span>
                     </div>
                   </div>
                 </div>
@@ -929,7 +907,7 @@
               </div>
             </div>
           </div>
-          <!-- Text Panel -->
+          
           <div class="flex flex-col justify-center max-w-xl">
             <span class="font-display text-[10px] font-bold text-accent uppercase tracking-widest mb-3">03 / FULL HD & AUDIO CONVERTER</span>
             <h2 class="font-display text-2xl md:text-3xl lg:text-4xl font-extrabold text-text leading-tight mb-6">Get crisp high-definition video and save audio offline.</h2>
@@ -952,8 +930,7 @@
       </div>
     </section>
 
-    <!-- 6. Philosophy Section -->
-    <section id="manifesto" class="py-[160px] px-6 max-w-[1400px] mx-auto relative flex flex-col items-center text-center bg-page-bg border-t border-line transition-colors duration-300">
+    <section id="manifesto" class="py-[160px] px-[15%] max-w-[1400px] mx-auto relative flex flex-col items-center text-center bg-page-bg border-t border-line transition-colors duration-300">
       <div class="absolute top-[20%] right-[10%] w-[350px] h-[350px] opacity-[0.03] pointer-events-none z-0">
         <svg class="w-full h-full" fill="none" stroke="currentColor" stroke-width="0.75" viewBox="0 0 100 100">
           <circle cx="50" cy="50" r="48"></circle>
@@ -973,23 +950,22 @@
       </p>
     </section>
 
-    <!-- 7. Meet The Developer Section ("Why I Built It" Redesigned with Human-Tone & Philosophy) -->
-    <section id="why-i-built-it" class="py-[120px] px-6 max-w-[1400px] mx-auto border-t border-line bg-page-bg relative transition-colors duration-300">
+    <section id="why-i-built-it" class="py-[120px] px-[15%] max-w-[1400px] mx-auto border-t border-line bg-page-bg relative transition-colors duration-300">
       <div class="absolute top-[40%] left-[20%] w-[300px] h-[300px] bg-accent-dim/10 rounded-full blur-[100px] pointer-events-none z-0"></div>
       
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-        <!-- Developer Profile Card Mockup -->
+        
         <div class="lg:col-span-5 flex justify-center">
           <div class="w-full max-w-[380px] bg-panel-bg border border-line rounded-[32px] p-6 shadow-xl relative overflow-hidden group transition-all duration-300">
-            <div class="absolute -top-12 -right-12 w-36 h-36 bg-gradient-to-br from-accent to-brand-pink opacity-[0.06] rounded-full blur-3xl group-hover:scale-110 transition-transform duration-500"></div>
+            <div class="absolute -top-12 -right-12 w-36 h-36 bg-accent opacity-[0.06] rounded-full blur-3xl group-hover:scale-110 transition-transform duration-500"></div>
             
             <div class="flex flex-col items-center text-center">
-              <!-- Custom Stylized Developer Avatar -->
-              <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-accent to-brand-pink p-1 shadow-xl mb-6 relative">
+              
+              <div class="w-24 h-24 rounded-full bg-accent p-1 shadow-xl mb-6 relative">
                 <div class="w-full h-full bg-soft-card rounded-full flex items-center justify-center overflow-hidden transition-colors duration-300">
                   <span class="material-symbols-outlined text-text text-4xl">code</span>
                 </div>
-                <span class="absolute bottom-1.5 right-1.5 w-4 h-4 bg-emerald-500 rounded-full border-2 border-panel-bg transition-colors duration-300 animate-pulse"></span>
+                <span class="absolute bottom-1.5 right-1.5 w-4 h-4 bg-accent rounded-full border-2 border-panel-bg transition-colors duration-300 animate-pulse"></span>
               </div>
               
               <h3 class="font-display text-xl font-bold text-text mb-1">Munier</h3>
@@ -1001,7 +977,6 @@
 
               <div class="w-full h-px bg-line mb-6 transition-colors duration-300"></div>
 
-              <!-- Interactive Social Links -->
               <div class="grid grid-cols-2 gap-4 w-full">
                 <a href="https://x.com/munier_ie" target="_blank" class="flex items-center justify-center gap-2 py-3 rounded-2xl bg-soft-card/40 border border-line hover:border-accent hover:bg-soft-card text-text font-sans text-xs font-bold uppercase tracking-wider transition-all duration-300 pointer-events-auto shadow-sm" title="Contact Munier on X (Twitter)">
                   <svg class="w-3.5 h-3.5 fill-current text-text" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -1020,7 +995,6 @@
           </div>
         </div>
 
-        <!-- The Narrative (Highly optimized, warm developer tone) -->
         <div class="lg:col-span-7 flex flex-col justify-center">
           <span class="font-display text-[11px] font-bold text-accent uppercase tracking-widest mb-3">Meet the Developer</span>
           <h2 class="font-display text-3xl md:text-5xl font-extrabold text-text tracking-tight mb-6">"I just wanted to download a video and keep scrolling."</h2>
@@ -1043,8 +1017,7 @@
       </div>
     </section>
 
-    <!-- 8. Download Center Section -->
-    <section id="download-center" class="py-[120px] px-6 max-w-[1400px] mx-auto border-t border-line bg-page-bg relative transition-colors duration-300">
+    <section id="download-center" class="py-[120px] px-[15%] max-w-[1400px] mx-auto border-t border-line bg-page-bg relative transition-colors duration-300">
       <div class="max-w-[1100px] mx-auto text-center">
         <span class="font-display text-[11px] font-bold text-accent uppercase tracking-widest mb-4 block">Official Distribution</span>
         <h2 class="font-display text-3xl md:text-5xl font-extrabold text-text tracking-tight mb-6">Secure Download Center</h2>
@@ -1052,23 +1025,21 @@
           Downloda is compiled into optimized architectures. Select the build tailored for your specific Android smartphone.
         </p>
 
-        <!-- Main Glassmorphic Download Box -->
         <div class="bg-panel-bg border border-line rounded-[24px] sm:rounded-[36px] p-5 sm:p-12 shadow-xl mb-16 relative overflow-hidden transition-colors duration-300">
-          <div class="absolute -top-12 -left-12 w-48 h-48 bg-gradient-to-br from-accent to-brand-pink opacity-[0.03] rounded-full blur-3xl"></div>
+          <div class="absolute -top-12 -left-12 w-48 h-48 bg-accent opacity-[0.03] rounded-full blur-3xl"></div>
           
           <div class="flex flex-col items-center mb-10">
-            <!-- Dynamic release details -->
+            
             <p id="release-tag" class="font-display text-lg font-bold text-text mb-1">Stable Release — Fetching...</p>
             <p id="release-date" class="font-sans text-xs text-muted">Checking GitHub for latest release...</p>
           </div>
 
-          <!-- Split APK buttons, dynamically linked via JS -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            <!-- ARM64 Download -->
-            <a id="btn-download-arm64" href="https://github.com/munier-ie/Downloda/releases/latest" class="group bg-black hover:bg-black/95 text-white rounded-[24px] p-6 hover:scale-[1.03] transition-all flex flex-col items-center justify-between min-h-[160px] shadow-lg relative overflow-hidden pointer-events-auto" title="Download ARM64 APK from GitHub releases">
+            
+            <a id="btn-download-arm64" href="https://github.com/munier-ie/Downloda/releases/latest" class="group bg-[#F8F5F2] border border-line hover:bg-[#EDE8E3] text-[#385144] dark:bg-[#2E4238] dark:border-[#26382F] dark:text-[#F8F5F2] dark:hover:bg-[#26382F] rounded-[24px] p-6 hover:scale-[1.03] transition-all flex flex-col items-center justify-between min-h-[160px] shadow-md relative overflow-hidden pointer-events-auto" title="Download ARM64 APK from GitHub releases">
               <div class="flex flex-col items-center text-center">
-                <span class="font-display font-extrabold text-lg mb-1 tracking-wide text-white">ARM64-v8a</span>
-                <span class="font-sans text-[11px] text-white/60 mb-4">Modern Android Devices</span>
+                <span class="font-display font-extrabold text-lg mb-1 tracking-wide text-text">ARM64-v8a</span>
+                <span class="font-sans text-[11px] text-muted mb-4">Modern Android Devices</span>
               </div>
               <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-[16px] text-accent">download</span>
@@ -1076,23 +1047,21 @@
               </div>
             </a>
 
-            <!-- ARMEabi Download -->
-            <a id="btn-download-armv7" href="https://github.com/munier-ie/Downloda/releases/latest" class="group bg-black hover:bg-black/95 text-white rounded-[24px] p-6 hover:scale-[1.03] transition-all flex flex-col items-center justify-between min-h-[160px] shadow-lg relative overflow-hidden pointer-events-auto" title="Download ARMEabi APK from GitHub releases">
+            <a id="btn-download-armv7" href="https://github.com/munier-ie/Downloda/releases/latest" class="group bg-[#F8F5F2] border border-line hover:bg-[#EDE8E3] text-[#385144] dark:bg-[#2E4238] dark:border-[#26382F] dark:text-[#F8F5F2] dark:hover:bg-[#26382F] rounded-[24px] p-6 hover:scale-[1.03] transition-all flex flex-col items-center justify-between min-h-[160px] shadow-md relative overflow-hidden pointer-events-auto" title="Download ARMEabi APK from GitHub releases">
               <div class="flex flex-col items-center text-center">
-                <span class="font-display font-extrabold text-lg mb-1 tracking-wide text-white">armeabi-v7a</span>
-                <span class="font-sans text-[11px] text-white/60 mb-4">Older Smartphones</span>
+                <span class="font-display font-extrabold text-lg mb-1 tracking-wide text-text">armeabi-v7a</span>
+                <span class="font-sans text-[11px] text-muted mb-4">Older Smartphones</span>
               </div>
               <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-[16px] text-brand-pink">download</span>
-                <span id="size-armv7" class="font-sans text-[12px] font-extrabold text-brand-pink">110.6 MB</span>
+                <span class="material-symbols-outlined text-[16px] text-accent">download</span>
+                <span id="size-armv7" class="font-sans text-[12px] font-extrabold text-accent">110.6 MB</span>
               </div>
             </a>
 
-            <!-- x86_64 Download -->
-            <a id="btn-download-x86" href="https://github.com/munier-ie/Downloda/releases/latest" class="group bg-black hover:bg-black/95 text-white rounded-[24px] p-6 hover:scale-[1.03] transition-all flex flex-col items-center justify-between min-h-[160px] shadow-lg relative overflow-hidden pointer-events-auto" title="Download x86 APK from GitHub releases">
+            <a id="btn-download-x86" href="https://github.com/munier-ie/Downloda/releases/latest" class="group bg-[#F8F5F2] border border-line hover:bg-[#EDE8E3] text-[#385144] dark:bg-[#2E4238] dark:border-[#26382F] dark:text-[#F8F5F2] dark:hover:bg-[#26382F] rounded-[24px] p-6 hover:scale-[1.03] transition-all flex flex-col items-center justify-between min-h-[160px] shadow-md relative overflow-hidden pointer-events-auto" title="Download x86 APK from GitHub releases">
               <div class="flex flex-col items-center text-center">
-                <span class="font-display font-extrabold text-lg mb-1 tracking-wide text-white">x86_64</span>
-                <span class="font-sans text-[11px] text-white/60 mb-4">Emulators & Tablets</span>
+                <span class="font-display font-extrabold text-lg mb-1 tracking-wide text-text">x86_64</span>
+                <span class="font-sans text-[11px] text-muted mb-4">Emulators & Tablets</span>
               </div>
               <div class="flex items-center gap-2">
                 <span class="material-symbols-outlined text-[16px] text-accent">download</span>
@@ -1104,10 +1073,9 @@
           <div class="h-px bg-line w-full mb-10 transition-colors duration-300"></div>
           
           <p class="font-display text-[10px] font-extrabold text-muted mb-8 uppercase tracking-widest">Alternative App Stores</p>
-          
-          <!-- Stores Grid with actual High-Fidelity brand logos in full color by default -->
+
           <div class="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-[800px] mx-auto">
-            <!-- Aptoide -->
+            
             <a target="_blank" href="https://downloda.en.aptoide.com/app" class="group flex flex-col items-center justify-center p-5 rounded-[24px] bg-panel-bg hover:bg-soft-card border border-line hover:border-accent transition-all duration-300 pointer-events-auto shadow-sm" title="Get Downloda on Aptoide App Store">
               <div class="h-12 flex items-center justify-center mb-3">
                 <img src="logos/Aptoide logo.png" alt="Aptoide App Store Logo" class="h-8 object-contain transition-transform duration-300 group-hover:scale-105" />
@@ -1115,7 +1083,6 @@
               <span class="font-display text-xs font-bold text-text group-hover:text-accent transition-colors">Aptoide</span>
             </a>
 
-            <!-- Uptodown -->
             <a target="_blank" href="https://downloda.en.uptodown.com/android" class="group flex flex-col items-center justify-center p-5 rounded-[24px] bg-panel-bg hover:bg-soft-card border border-line hover:border-accent transition-all duration-300 pointer-events-auto shadow-sm" title="Get Downloda on Uptodown App Store">
               <div class="h-12 flex items-center justify-center mb-3">
                 <img src="logos/updown logo.png" alt="Uptodown App Store Logo" class="h-8 object-contain transition-transform duration-300 group-hover:scale-105" />
@@ -1123,7 +1090,6 @@
               <span class="font-display text-xs font-bold text-text group-hover:text-accent transition-colors">Uptodown</span>
             </a>
 
-            <!-- APKPure -->
             <a target="_blank" href="https://apkpure.com/search?q=munier.ie.dwldr" class="group flex flex-col items-center justify-center p-5 rounded-[24px] bg-panel-bg hover:bg-soft-card border border-line hover:border-accent transition-all duration-300 pointer-events-auto shadow-sm" title="Get Downloda on APKPure Store">
               <div class="h-12 flex items-center justify-center mb-3">
                 <img src="logos/apkpure.webp" alt="APKPure App Store Logo" class="h-8 object-contain transition-transform duration-300 group-hover:scale-105" />
@@ -1131,7 +1097,6 @@
               <span class="font-display text-xs font-bold text-text group-hover:text-accent transition-colors">APKPure</span>
             </a>
 
-            <!-- APKMirror -->
             <a target="_blank" href="https://www.apkmirror.com/?post_type=app_release&searchtype=apk&s=Downloda" class="group flex flex-col items-center justify-center p-5 rounded-[24px] bg-panel-bg hover:bg-soft-card border border-line hover:border-accent transition-all duration-300 pointer-events-auto shadow-sm" title="Get Downloda on APKMirror Store">
               <div class="h-12 flex items-center justify-center mb-3">
                 <img src="logos/apkmirror.png" alt="APKMirror App Store Logo" class="h-8 object-contain transition-transform duration-300 group-hover:scale-105" />
@@ -1143,43 +1108,40 @@
       </div>
     </section>
 
-    <!-- 9. Final CTA Section (Beautiful Grounding Dark Footer) -->
-    <footer class="py-[120px] px-6 bg-black text-white rounded-t-[48px] md:rounded-t-[64px] border-t border-white/10 relative z-20">
+    <footer class="py-[120px] px-[15%] bg-[#EDE8E3] dark:bg-[#2E4238] text-text dark:text-[#F8F5F2] rounded-t-[48px] md:rounded-t-[64px] border-t border-line dark:border-[#F8F5F2]/5 relative z-20 transition-colors duration-300">
       <div class="max-w-[1200px] mx-auto flex flex-col items-center text-center">
-        <!-- Dynamically swapped logo image -->
-        <img id="footer-logo" src="logos/LightDwldrLogo.png" alt="Downloda Brand Icon" class="w-16 h-16 rounded-[22px] border border-white/10 shadow-2xl mb-10 transition-all duration-300" />
         
-        <h2 class="font-display text-4xl md:text-6xl font-extrabold tracking-tight text-white mb-10 max-w-4xl text-balance">
+        <img id="footer-logo" src="logos/logo.png" alt="Downloda Brand Icon" class="w-16 h-16 rounded-[22px] border border-[#385144]/20 dark:border-[#F8F5F2]/20 shadow-2xl mb-10 transition-all duration-300" />
+        
+        <h2 class="font-display text-4xl md:text-6xl font-extrabold tracking-tight text-[#385144] dark:text-[#F8F5F2] mb-10 max-w-4xl text-balance">
           Experience zero-friction media downloads today.
         </h2>
         <div class="flex flex-col sm:flex-row gap-4 mb-24">
-          <a href="#download-center" class="bg-white hover:bg-white/95 text-black font-sans font-extrabold rounded-full transition-all duration-300 flex items-center justify-center px-8 py-4 text-[11px] uppercase tracking-widest shadow-md pointer-events-auto" title="Download Downloda APK Natively">
+          <a href="#download-center" class="bg-[#385144] hover:bg-[#2E4238] dark:bg-[#F8F5F2] dark:hover:bg-[#EDE8E3] text-[#F8F5F2] dark:text-[#385144] font-sans font-extrabold rounded-full transition-all duration-300 flex items-center justify-center px-8 py-4 text-[11px] uppercase tracking-widest shadow-md pointer-events-auto" title="Download Downloda APK Natively">
             Download Downloda APK Natively
           </a>
-          <a href="https://github.com/munier-ie/Downloda/issues" target="_blank" class="bg-transparent border border-white/20 text-white hover:bg-white/5 font-sans font-extrabold rounded-full transition-all duration-300 flex items-center justify-center px-8 py-4 text-[11px] uppercase tracking-widest pointer-events-auto" title="Submit bug reports or issues on GitHub">
+          <a href="https://github.com/munier-ie/Downloda/issues" target="_blank" class="bg-transparent border border-[#385144]/30 dark:border-[#F8F5F2]/25 text-[#385144] dark:text-[#F8F5F2] hover:bg-[#385144]/10 dark:hover:bg-[#F8F5F2]/10 font-sans font-extrabold rounded-full transition-all duration-300 flex items-center justify-center px-8 py-4 text-[11px] uppercase tracking-widest pointer-events-auto" title="Submit bug reports or issues on GitHub">
             Report Downloda Issues
           </a>
         </div>
 
-        <div class="w-full border-t border-white/10 pt-12 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p class="font-sans text-xs text-white/40">© 2026 Downloda Project. Made with human sense by Munier. Released under the open-source MIT License.</p>
-          <div class="flex gap-8 text-[11px] font-bold text-white/50 uppercase tracking-widest pointer-events-auto">
-            <a class="hover:text-white transition-colors" href="https://github.com/munier-ie/Downloda/blob/main/LICENSE" target="_blank" title="MIT License text">License</a>
-            <a class="hover:text-white transition-colors" href="https://github.com/munier-ie/Downloda/blob/main/SECURITY.md" target="_blank" title="Security policy details">Security</a>
-            <a class="hover:text-white transition-colors" href="https://github.com/munier-ie/Downloda/blob/main/CONTRIBUTING.md" target="_blank" title="Open-source contributions guide">Contributing</a>
+        <div class="w-full border-t border-[#385144]/15 dark:border-[#F8F5F2]/15 pt-12 flex flex-col md:flex-row justify-between items-center gap-6">
+          <p class="font-sans text-xs text-[#385144]/50 dark:text-[#F8F5F2]/50">© 2026 Munier. All rights reserved. Downloda is open-source software licensed under the MIT License.</p>
+          <div class="flex gap-8 text-[11px] font-bold text-[#385144]/50 dark:text-[#F8F5F2]/50 uppercase tracking-widest pointer-events-auto">
+            <a class="hover:text-[#385144] dark:hover:text-[#F8F5F2] transition-colors" href="https://github.com/munier-ie/Downloda/blob/main/LICENSE" target="_blank" title="MIT License text">License</a>
+            <a class="hover:text-[#385144] dark:hover:text-[#F8F5F2] transition-colors" href="https://github.com/munier-ie/Downloda/blob/main/SECURITY.md" target="_blank" title="Security policy details">Security</a>
+            <a class="hover:text-[#385144] dark:hover:text-[#F8F5F2] transition-colors" href="https://github.com/munier-ie/Downloda/blob/main/CONTRIBUTING.md" target="_blank" title="Open-source contributions guide">Contributing</a>
           </div>
         </div>
       </div>
     </footer>
   </main>
 
-  <!-- Interactive Device Simulator Script -->
   <script>
     let activeSimStep = 0;
     let notifInterval = null;
 
     function simTriggerShare() {
-      // Step 1: Open Share sheet inside simulator
       const shareSheet = document.getElementById('sim-share-sheet');
       const shareBtn = document.getElementById('sim-share-btn');
       
@@ -1187,7 +1149,6 @@
       shareBtn.classList.remove('animate-pulse');
       shareBtn.classList.add('opacity-50');
 
-      // Update instructions on the left
       document.getElementById('sim-btn-1').classList.add('opacity-50');
       
       const btn2 = document.getElementById('sim-btn-2');
@@ -1200,11 +1161,9 @@
     function simClickDownloda() {
       if (activeSimStep !== 1) return;
 
-      // Step 2: Hide Share sheet and trigger background download progress
       const shareSheet = document.getElementById('sim-share-sheet');
       shareSheet.classList.add('translate-y-full');
 
-      // Show toast
       const toast = document.getElementById('sim-toast');
       toast.classList.remove('scale-0');
       toast.classList.add('scale-100');
@@ -1214,17 +1173,14 @@
         toast.classList.add('scale-0');
       }, 2500);
 
-      // Slide down notification drawer
       const notifDrawer = document.getElementById('sim-notif-drawer');
       notifDrawer.classList.remove('-translate-y-[150%]');
 
-      // Start scrolling feed simulation
       const feed = document.getElementById('sim-feed-container');
       setTimeout(() => {
         feed.scrollTo({ top: 310, behavior: 'smooth' });
       }, 1000);
 
-      // Start notification progress indicator
       let pct = 0;
       const bar = document.getElementById('sim-notif-bar');
       const pctTxt = document.getElementById('sim-notif-pct');
@@ -1253,12 +1209,11 @@
           speedTxt.textContent = 'Download finished! Saved to gallery.';
           pctTxt.textContent = 'Done';
           pctTxt.classList.remove('text-accent');
-          pctTxt.classList.add('text-emerald-400');
+          pctTxt.classList.add('text-accent');
           bar.classList.remove('bg-gradient-to-r', 'from-accent', 'to-brand-pink');
-          bar.classList.add('bg-emerald-500');
+          bar.classList.add('bg-accent');
 
-          // Toast done
-          toast.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span><span>Downloda: Download finished successfully!</span>';
+          toast.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-accent"></span><span>Downloda: Download finished successfully!</span>';
           toast.classList.remove('scale-0');
           toast.classList.add('scale-100');
           setTimeout(() => {
@@ -1268,7 +1223,6 @@
         }
       }, 350);
 
-      // Update instructions on the left
       document.getElementById('sim-btn-2').classList.add('opacity-50');
       
       const btn3 = document.getElementById('sim-btn-3');
@@ -1284,7 +1238,6 @@
       } else if (step === 2) {
         simClickDownloda();
       } else if (step === 3) {
-        // scroll further
         const feed = document.getElementById('sim-feed-container');
         feed.scrollTo({ top: 600, behavior: 'smooth' });
       }
@@ -1293,23 +1246,19 @@
     function resetSim() {
       clearInterval(notifInterval);
       
-      // Reset share sheet
       const shareSheet = document.getElementById('sim-share-sheet');
       shareSheet.classList.add('translate-y-full');
 
-      // Reset toast
       const toast = document.getElementById('sim-toast');
       toast.classList.add('scale-0');
       toast.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-accent"></span><span>Downloda: Background download started...</span>';
 
-      // Reset notif drawer
       const notifDrawer = document.getElementById('sim-notif-drawer');
       notifDrawer.classList.add('-translate-y-[150%]');
 
-      // Reset progress
       const bar = document.getElementById('sim-notif-bar');
       bar.style.width = '0%';
-      bar.className = 'h-full bg-gradient-to-r from-accent to-brand-pink w-[0%] transition-all duration-300';
+      bar.className = 'h-full bg-accent w-[0%] transition-all duration-300';
       
       const pctTxt = document.getElementById('sim-notif-pct');
       pctTxt.textContent = '0%';
@@ -1318,11 +1267,9 @@
       const speedTxt = document.getElementById('sim-notif-speed');
       speedTxt.textContent = 'Preparing isolates...';
 
-      // Reset feed scroll
       const feed = document.getElementById('sim-feed-container');
       feed.scrollTo({ top: 0, behavior: 'smooth' });
 
-      // Reset buttons
       const shareBtn = document.getElementById('sim-share-btn');
       shareBtn.className = 'flex items-center gap-1.5 text-white/95 hover:text-accent transition-colors px-3 py-1 rounded-full bg-white/5 border border-white/5 animate-pulse';
 
@@ -1340,30 +1287,22 @@
     }
   </script>
 
-  <!-- Premium Theme Switcher & Image swap Script -->
   <script>
     const themeToggleBtn = document.getElementById('theme-toggle-btn');
     const themeToggleIcon = document.getElementById('theme-toggle-icon');
-    const navLogo = document.getElementById('nav-logo');
-    const footerLogo = document.getElementById('footer-logo');
 
     function applyTheme(theme) {
       if (theme === 'dark') {
         document.documentElement.classList.add('dark');
         themeToggleIcon.textContent = 'light_mode';
-        navLogo.src = 'logos/DarkDwldrLogo.png';
-        footerLogo.src = 'logos/DarkDwldrLogo.png';
       } else {
         document.documentElement.classList.remove('dark');
         themeToggleIcon.textContent = 'dark_mode';
-        navLogo.src = 'logos/LightDwldrLogo.png';
-        footerLogo.src = 'logos/LightDwldrLogo.png';
       }
       localStorage.setItem('theme', theme);
     }
 
-    // Initialize Theme (defaults to dark or respects local preference)
-    const savedTheme = localStorage.getItem('theme') || 'dark';
+    const savedTheme = localStorage.getItem('theme') || 'light';
     applyTheme(savedTheme);
 
     themeToggleBtn.addEventListener('click', () => {
@@ -1372,7 +1311,6 @@
     });
   </script>
 
-  <!-- JavaScript module for Real-Time GitHub Release Binding -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const repo = 'munier-ie/Downloda';
@@ -1391,7 +1329,6 @@
       
       const defaultReleasePage = `https://github.com/${repo}/releases/latest`;
 
-      // Fetch latest release details
       fetch(apiEndpoint)
         .then(response => {
           if (!response.ok) throw new Error('API Rate Limit exceeded or Network Error');
@@ -1399,16 +1336,13 @@
         })
         .then(data => {
           if (data && data.tag_name) {
-            // Update tag name
             releaseTagEl.textContent = `Stable Release — ${data.tag_name}`;
             
-            // Format publication date
             if (data.published_at) {
               const date = new Date(data.published_at);
               releaseDateEl.textContent = `Published on ${date.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}`;
             }
             
-            // Extract assets
             const assets = data.assets || [];
             
             const arm64Asset = assets.find(a => a.name.includes('arm64-v8a'));
@@ -1439,7 +1373,6 @@
         })
         .catch(error => {
           console.warn('GitHub API Fetch failed, falling back to static release paths:', error);
-          // Standard fallbacks pointing to the general release assets
           releaseTagEl.textContent = 'Stable Release — v1.0.0';
           releaseDateEl.textContent = 'Download directly below';
           

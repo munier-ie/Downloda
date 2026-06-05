@@ -34,7 +34,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   late List<OnboardingData> _pages;
 
-  final Color _accentColor = const Color(0xFF8B5CF6);
+  Color get _accentColor => context.colorAccent;
 
   @override
   void initState() {
@@ -99,7 +99,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         width: 90,
         height: 140,
         decoration: BoxDecoration(
-          color: isSelected ? color : (isDark ? const Color(0xFF1E222B) : Colors.white),
+          color: isSelected ? color : (isDark ? context.colorElevated : Colors.white),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: isSelected ? color : color.withValues(alpha: 0.1),

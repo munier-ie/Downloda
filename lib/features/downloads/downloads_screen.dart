@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart' as yt_exp;
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../core/theme.dart';
 import '../../core/models.dart';
@@ -112,9 +114,24 @@ class _DownloadsScreenState extends ConsumerState<DownloadsScreen> with WidgetsB
 
     try {
       if (platform == MediaPlatform.youtube) {
+        String targetUrl = url;
+        if (targetUrl.contains('/shorts/')) {
+          final shortsRegExp = RegExp(r'/shorts/([a-zA-Z0-9_-]+)(\?.*)?');
+          final match = shortsRegExp.firstMatch(targetUrl);
+          if (match != null) {
+            final videoId = match.group(1);
+            final queryParams = match.group(2);
+            if (queryParams != null && queryParams.startsWith('?')) {
+              final normalizedQueryParams = '&${queryParams.substring(1)}';
+              targetUrl = targetUrl.replaceAll(shortsRegExp, '/watch?v=$videoId$normalizedQueryParams');
+            } else {
+              targetUrl = targetUrl.replaceAll(shortsRegExp, '/watch?v=$videoId');
+            }
+          }
+        }
         final yt = yt_exp.YoutubeExplode();
-        if (_isYoutubePlaylist(url)) {
-          final playlist = await yt.playlists.get(url);
+        if (_isYoutubePlaylist(targetUrl)) {
+          final playlist = await yt.playlists.get(targetUrl);
           final videosStream = yt.playlists.getVideos(playlist.id);
           final videos = await videosStream.toList();
           if (mounted) {
@@ -125,7 +142,7 @@ class _DownloadsScreenState extends ConsumerState<DownloadsScreen> with WidgetsB
             _showPlaylistDrawer();
           }
         } else {
-          final video = await yt.videos.get(url);
+          final video = await yt.videos.get(targetUrl);
           if (mounted) {
             setState(() {
               _ytMetadata = video;
@@ -609,12 +626,26 @@ class _DownloadTile extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: item.thumbnailUrl != null
-                ? Image.network(item.thumbnailUrl!,
-                    width: 44, height: 44, fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
+                ? (item.thumbnailUrl!.startsWith('http')
+                    ? CachedNetworkImage(
+                        imageUrl: item.thumbnailUrl!,
                         width: 44,
                         height: 44,
-                        color: context.colorSurface))
+                        fit: BoxFit.cover,
+                        errorWidget: (context, url, error) => Container(
+                            width: 44,
+                            height: 44,
+                            color: context.colorSurface))
+                    : Image.file(
+                        File(item.thumbnailUrl!),
+                        width: 44,
+                        height: 44,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => Container(
+                            width: 44,
+                            height: 44,
+                            color: context.colorSurface),
+                      ))
                 : Container(
                     width: 44, height: 44, color: context.colorSurface),
           ),
@@ -661,9 +692,13 @@ class _DownloadTile extends StatelessWidget {
                 Text(' • ',
                     style: TextStyle(color: context.colorTextTertiary)),
               ],
-              Text(item.progressLabel,
-                  style: TextStyle(
-                      fontSize: 11, color: context.colorTextSecondary)),
+              Text(
+                item.fileSizeMb > 0
+                    ? '${item.progressLabel} (${item.fileSizeLabel})'
+                    : item.progressLabel,
+                style: TextStyle(
+                    fontSize: 11, color: context.colorTextSecondary),
+              ),
               if (isActive && item.speedMbps > 0) ...[
                 Text(' • ',
                     style: TextStyle(color: context.colorTextTertiary)),
@@ -788,20 +823,51 @@ class _DownloadDrawerState extends State<_DownloadDrawer> {
         final audioStream = _ytManifest!.audioOnly.withHighestBitrate();
         totalMb = audioStream.size.totalMegaBytes;
       } else {
-        final muxed = _ytManifest!.muxed.toList();
-        yt_exp.MuxedStreamInfo? bestStream;
         final resNum = int.tryParse(_selectedYtRes.replaceAll(RegExp(r'[^0-9]'), '')) ?? 1080;
-        muxed.sort((a, b) => b.videoResolution.height.compareTo(a.videoResolution.height));
-        for (final s in muxed) {
-          if (s.videoResolution.height <= resNum) {
-            bestStream = s;
-            break;
+        if (resNum > 360) {
+          final videoStreams = _ytManifest!.videoOnly.toList();
+          videoStreams.sort((a, b) => b.videoResolution.height.compareTo(a.videoResolution.height));
+          yt_exp.VideoOnlyStreamInfo? bestVideoOnly;
+          for (final s in videoStreams) {
+            if (s.videoResolution.height <= resNum) {
+              bestVideoOnly = s;
+              break;
+            }
           }
+          bestVideoOnly ??= videoStreams.isNotEmpty ? videoStreams.first : null;
+          final audioStream = _ytManifest!.audioOnly.withHighestBitrate();
+          if (bestVideoOnly != null) {
+            totalMb = bestVideoOnly.size.totalMegaBytes + audioStream.size.totalMegaBytes;
+          } else {
+            final muxed = _ytManifest!.muxed.toList();
+            yt_exp.MuxedStreamInfo? bestStream;
+            muxed.sort((a, b) => b.videoResolution.height.compareTo(a.videoResolution.height));
+            for (final s in muxed) {
+              if (s.videoResolution.height <= resNum) {
+                bestStream = s;
+                break;
+              }
+            }
+            bestStream ??= muxed.isNotEmpty
+                ? muxed.first
+                : (_ytManifest!.muxed.isEmpty ? null : _ytManifest!.muxed.withHighestBitrate());
+            totalMb = bestStream?.size.totalMegaBytes ?? 0;
+          }
+        } else {
+          final muxed = _ytManifest!.muxed.toList();
+          yt_exp.MuxedStreamInfo? bestStream;
+          muxed.sort((a, b) => b.videoResolution.height.compareTo(a.videoResolution.height));
+          for (final s in muxed) {
+            if (s.videoResolution.height <= resNum) {
+              bestStream = s;
+              break;
+            }
+          }
+          bestStream ??= muxed.isNotEmpty
+              ? muxed.first
+              : (_ytManifest!.muxed.isEmpty ? null : _ytManifest!.muxed.withHighestBitrate());
+          totalMb = bestStream?.size.totalMegaBytes ?? 0;
         }
-        bestStream ??= muxed.isNotEmpty
-            ? muxed.first
-            : _ytManifest!.muxed.withHighestBitrate();
-        totalMb = bestStream.size.totalMegaBytes;
       }
       if (totalMb >= 1024) {
         return '${(totalMb / 1024).toStringAsFixed(1)} GB';
@@ -930,8 +996,13 @@ class _DownloadDrawerState extends State<_DownloadDrawer> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
                 child: thumb != null
-                    ? Image.network(thumb, width: 100, height: 75, fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => Container(width: 100, height: 75, color: context.colorSurface))
+                    ? CachedNetworkImage(
+                        imageUrl: thumb,
+                        width: 100,
+                        height: 75,
+                        fit: BoxFit.cover,
+                        errorWidget: (context, url, error) => Container(
+                            width: 100, height: 75, color: context.colorSurface))
                     : Container(width: 100, height: 75, color: context.colorSurface),
               ),
               const SizedBox(width: 16),
@@ -1095,6 +1166,11 @@ class _DownloadDrawerState extends State<_DownloadDrawer> {
         label = 'X';
         color = Colors.black;
         icon = Icons.close_rounded;
+        break;
+      case MediaPlatform.reddit:
+        label = 'Reddit';
+        color = Colors.orange;
+        icon = Icons.reddit;
         break;
     }
 
@@ -1314,8 +1390,13 @@ class _PlaylistDrawerState extends State<_PlaylistDrawer> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: thumb != null
-                      ? Image.network(thumb, width: 100, height: 75, fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => Container(width: 100, height: 75, color: context.colorSurface))
+                      ? CachedNetworkImage(
+                          imageUrl: thumb,
+                          width: 100,
+                          height: 75,
+                          fit: BoxFit.cover,
+                          errorWidget: (context, url, error) => Container(
+                              width: 100, height: 75, color: context.colorSurface))
                       : Container(width: 100, height: 75, color: context.colorSurface),
                 ),
                 const SizedBox(width: 16),
@@ -1485,12 +1566,12 @@ class _PlaylistDrawerState extends State<_PlaylistDrawer> {
                             children: [
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                  video.thumbnails.mediumResUrl,
+                                child: CachedNetworkImage(
+                                  imageUrl: video.thumbnails.mediumResUrl,
                                   width: 80,
                                   height: 50,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
+                                  errorWidget: (context, url, error) =>
                                       Container(width: 80, height: 50, color: context.colorSurface),
                                 ),
                               ),

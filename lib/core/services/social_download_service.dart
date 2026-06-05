@@ -61,6 +61,9 @@ class SocialDownloadService {
     if (u.contains('x.com') || u.contains('twitter.com')) {
       return MediaPlatform.x;
     }
+    if (u.contains('reddit.com') || u.contains('redd.it')) {
+      return MediaPlatform.reddit;
+    }
     return null; // unsupported
   }
 
@@ -87,6 +90,8 @@ class SocialDownloadService {
           return await _fetchTikTok(url);
         case MediaPlatform.x:
           return await _fetchTwitter(url);
+        case MediaPlatform.reddit:
+          return await _fetchReddit(url);
         default:
           throw Exception('Unsupported platform');
       }
@@ -132,10 +137,11 @@ class SocialDownloadService {
     final thumbnail =
         (items.isNotEmpty ? items.first['thumbnail'] as String? : null);
 
-    // The API doesn't return a title for Meta platforms — use a fallback
-    final title = platform == MediaPlatform.instagram
-        ? 'Instagram Reel'
-        : 'Facebook Video';
+    // The API might return a crawled title for Meta platforms — if so use it, else fallback
+    final title = (data['title'] as String?) ??
+        (platform == MediaPlatform.instagram
+            ? 'Instagram Reel'
+            : 'Facebook Video');
 
     return SocialMediaInfo(
       title: title,
@@ -228,6 +234,41 @@ class SocialDownloadService {
       title: title,
       thumbnailUrl: thumbnail,
       platform: MediaPlatform.x,
+      variants: variants,
+    );
+  }
+
+  // ── Reddit via /api/reddit/download ──────────────────────────────────────
+
+  Future<SocialMediaInfo> _fetchReddit(String url) async {
+    final resp = await _dio.get(
+      '$kSocialApiBase/api/reddit/download',
+      queryParameters: {'url': url},
+    );
+
+    final body = resp.data as Map<String, dynamic>;
+    if (body['success'] != true) {
+      throw Exception('API error: ${body['error'] ?? 'unknown'}');
+    }
+
+    final downloadUrl = body['data'] as String?;
+    if (downloadUrl == null || downloadUrl.isEmpty) {
+      throw Exception('No downloadable Reddit URL found');
+    }
+
+    // Wrap the direct URL in a VideoVariant list
+    final variants = [
+      VideoVariant(
+        quality: 'Best Quality',
+        url: downloadUrl,
+        format: 'mp4',
+      )
+    ];
+
+    return SocialMediaInfo(
+      title: 'Reddit Video',
+      thumbnailUrl: null,
+      platform: MediaPlatform.reddit,
       variants: variants,
     );
   }

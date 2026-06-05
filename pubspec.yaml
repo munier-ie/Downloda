@@ -57,6 +57,7 @@ dependencies:
   lottie: ^3.3.3
   url_launcher: ^6.3.2
   device_info_plus: ^13.1.0
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:
@@ -118,4 +119,4 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/images/LightDwldrLogo.png"
+  image_path: "assets/logo.png"

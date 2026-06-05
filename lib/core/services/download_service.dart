@@ -7,6 +7,7 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'dart:ui';
@@ -96,45 +97,49 @@ class DownloadService {
     _isCheckingQueue = true;
 
     try {
-      final maxSim = await _getMaxSimultaneous();
-      final activeCount = await getActiveCount();
-      debugPrint('[QueueManager] Checking queue: active=$activeCount, max=$maxSim');
+      // Fill ALL available download slots, not just one
+      while (true) {
+        final maxSim = await _getMaxSimultaneous();
+        final activeCount = await getActiveCount();
+        debugPrint('[QueueManager] Checking queue: active=$activeCount, max=$maxSim');
 
-      if (activeCount >= maxSim) {
-        debugPrint('[QueueManager] Max simultaneous downloads reached.');
-        return;
+        if (activeCount >= maxSim) {
+          debugPrint('[QueueManager] Max simultaneous downloads reached.');
+          break;
+        }
+
+        final all = await db.getActiveDownloads();
+        // Find queued items that are not awaiting resolution choice
+        final queuedItems = all
+            .where((i) =>
+                i.status == DownloadStatus.queued &&
+                i.resolution != 'ask' &&
+                !_activeTasks.contains(i.id))
+            .toList();
+        queuedItems.sort((a, b) => a.addedAt.compareTo(b.addedAt));
+
+        if (queuedItems.isEmpty) {
+          debugPrint('[QueueManager] No queued items found.');
+          break;
+        }
+
+        final next = queuedItems.first;
+        debugPrint('[QueueManager] Starting queued: ${next.title} (${next.id})');
+
+        // Update status immediately so the next iteration counts this slot as occupied
+        final companion = next.toCompanion(false).copyWith(
+              status: const Value(DownloadStatus.preparing),
+            );
+        await db.updateDownload(companion);
+        _activeTasks.add(next.id); // Mark immediately to avoid double-starting
+
+        _startDownload(
+          id: next.id,
+          url: next.url,
+          existingItem: next.toModel(),
+          thumbnailUrl: next.thumbnailUrl,
+        );
       }
-
-      final all = await db.getActiveDownloads();
-      // Find queued items that are not awaiting resolution choice
-      final queuedItems = all
-          .where((i) =>
-              i.status == DownloadStatus.queued && 
-              i.resolution != 'ask' &&
-              !_activeTasks.contains(i.id))
-          .toList();
-      queuedItems.sort((a, b) => a.addedAt.compareTo(b.addedAt));
-
-      if (queuedItems.isEmpty) {
-        debugPrint('[QueueManager] No queued items found.');
-        return;
-      }
-
-      final next = queuedItems.first;
-      debugPrint('[QueueManager] Starting queued: ${next.title} (${next.id})');
-
-      // Update status immediately so concurrent check loops recognize this occupied slot
-      final companion = next.toCompanion(false).copyWith(
-            status: const Value(DownloadStatus.preparing),
-          );
-      await db.updateDownload(companion);
-
-      _startDownload(
-        id: next.id,
-        url: next.url,
-        existingItem: next.toModel(),
-        thumbnailUrl: next.thumbnailUrl,
-      );
     } finally {
       _isCheckingQueue = false;
     }
@@ -406,7 +411,148 @@ class DownloadService {
 
   String _extractUrl(String raw) {
     final re = RegExp(r'https?://[^\s]+', caseSensitive: false);
-    return re.firstMatch(raw)?.group(0) ?? raw;
+    String extracted = re.firstMatch(raw)?.group(0) ?? raw;
+
+    // Normalize YouTube Shorts URLs
+    if (extracted.contains('/shorts/')) {
+      final shortsRegExp = RegExp(r'/shorts/([a-zA-Z0-9_-]+)(\?.*)?');
+      final match = shortsRegExp.firstMatch(extracted);
+      if (match != null) {
+        final videoId = match.group(1);
+        final queryParams = match.group(2);
+        if (queryParams != null && queryParams.startsWith('?')) {
+          final normalizedQueryParams = '&${queryParams.substring(1)}';
+          extracted = extracted.replaceAll(shortsRegExp, '/watch?v=$videoId$normalizedQueryParams');
+        } else {
+          extracted = extracted.replaceAll(shortsRegExp, '/watch?v=$videoId');
+        }
+      }
+    }
+    return extracted;
+  }
+
+  Future<int> _downloadStreamChunked({
+    required String id,
+    required String url,
+    required String tempPath,
+    required int startByte,
+    required int totalStreamBytes,
+    required int overallProgressStart,
+    required int overallTotalBytes,
+    required CancelToken cancelToken,
+    required DownloadItem item,
+    required int notifId,
+    required bool batterySaver,
+  }) async {
+    final file = File(tempPath);
+
+    final options = Options(
+      responseType: ResponseType.stream,
+      headers: startByte > 0 ? {'Range': 'bytes=$startByte-'} : null,
+    );
+
+    final response = await dio.get<ResponseBody>(
+      url,
+      options: options,
+      cancelToken: cancelToken,
+    );
+
+    final isPartial = response.statusCode == 206;
+    int actualStart = startByte;
+    if (startByte > 0 && !isPartial) {
+      debugPrint('[DownloadService] Server does not support resume. Starting over.');
+      actualStart = 0;
+    }
+
+    final totalBytes = int.tryParse(response.headers.value('content-length') ?? '0') ?? 0;
+    final streamFullSize = isPartial ? (totalBytes + actualStart) : totalBytes;
+
+    final double sizeInMb = (overallTotalBytes > 0 ? overallTotalBytes : streamFullSize) / (1024 * 1024);
+    if (sizeInMb > 0) {
+      item.fileSizeMb = sizeInMb;
+      await db.updateDownload(item.toCompanion());
+    }
+
+    final sink = file.openWrite(
+        mode: (actualStart > 0 && isPartial) ? FileMode.append : FileMode.write);
+
+    int downloadedInStream = actualStart;
+    DateTime lastUpdate = DateTime.now();
+    int lastBytes = actualStart;
+
+    try {
+      await for (final chunk in response.data!.stream) {
+        if (_paused[id] == true) {
+          debugPrint('[DownloadService] Stream loop: pause detected for $id');
+          break;
+        }
+        sink.add(chunk);
+        downloadedInStream += chunk.length;
+
+        if (batterySaver) {
+          await Future.delayed(const Duration(milliseconds: 80));
+        }
+
+        final now = DateTime.now();
+        final diffMs = now.difference(lastUpdate).inMilliseconds;
+        if (diffMs >= 800) {
+          final dbItem = await db.getDownloadById(id);
+          if (dbItem == null) {
+            debugPrint('[DownloadService] Stream loop: cancel/delete detected in DB for $id');
+            _paused[id] = true;
+            break;
+          } else if (dbItem.status == DownloadStatus.paused) {
+            debugPrint('[DownloadService] Stream loop: pause detected in DB for $id');
+            _paused[id] = true;
+            break;
+          }
+
+          if (!await _canDownload()) {
+            debugPrint('[DownloadService] Dynamic network check failed. Pausing.');
+            _paused[id] = true;
+            break;
+          }
+
+          final currentOverallDownloaded = overallProgressStart + downloadedInStream;
+          final double progress = overallTotalBytes > 0
+              ? currentOverallDownloaded / overallTotalBytes
+              : (streamFullSize > 0 ? downloadedInStream / streamFullSize : 0.0);
+
+          final speed = ((downloadedInStream - lastBytes) / (diffMs / 1000)) / (1024 * 1024);
+
+          final eta = speed > 0
+              ? (((overallTotalBytes > 0 ? overallTotalBytes : streamFullSize) - currentOverallDownloaded) / (speed * 1024 * 1024)).toInt()
+              : 0;
+
+          lastUpdate = now;
+          lastBytes = downloadedInStream;
+
+          item.progress = progress;
+          item.speedMbps = speed;
+          item.etaSeconds = eta;
+          item.status = DownloadStatus.downloading;
+          await db.updateDownload(item.toCompanion());
+          pingUi();
+
+          await NotificationService().showProgressNotification(
+            id: notifId,
+            title: item.title,
+            body: '${item.progressLabel} • ${item.resolution} ${item.format.toUpperCase()} • ${item.speedLabel} • ETA ${item.etaLabel}',
+            progress: (progress * 100).toInt(),
+            maxProgress: 100,
+            actions: [
+              const AndroidNotificationAction('pause', 'Pause', showsUserInterface: false),
+              const AndroidNotificationAction('cancel', 'Cancel', showsUserInterface: false),
+            ],
+            payload: id,
+          );
+        }
+      }
+    } finally {
+      await sink.flush();
+      await sink.close();
+    }
+    return downloadedInStream;
   }
 
   DownloadItem _makeQueuedItem(String id, String url, String resolution) {
@@ -490,12 +636,16 @@ class DownloadService {
     }
 
     try {
-      String streamUrl;
-      String resolvedFormat;
-      String resolvedResolution;
-      String videoTitle;
+      String streamUrl = '';
+      String? audioStreamUrl;
+      String resolvedFormat = '';
+      String resolvedResolution = '';
+      String videoTitle = '';
       String? thumb;
       double sizeMb = 0;
+      bool isDash = false;
+      int videoStreamSize = 0;
+      int audioStreamSize = 0;
 
       if (platform == MediaPlatform.youtube && directUrl == null) {
         // ── 1. Fetch metadata ──
@@ -505,34 +655,60 @@ class DownloadService {
         thumb = video.thumbnails.mediumResUrl;
 
         // ── 2. Pick stream ──
-        StreamInfo streamInfo;
         if (useAudioOnly) {
           final audioStream = manifest.audioOnly.withHighestBitrate();
-          streamInfo = audioStream;
+          streamUrl = audioStream.url.toString();
           resolvedFormat = audioStream.container.name;
           resolvedResolution = 'Audio';
+          sizeMb = audioStream.size.totalMegaBytes;
         } else {
-          final muxed = manifest.muxed.toList();
-          MuxedStreamInfo? bestStream;
           final resNum =
               int.tryParse(useRes.replaceAll(RegExp(r'[^0-9]'), '')) ?? 1080;
-          muxed.sort((a, b) =>
+          
+          final videoStreams = manifest.videoOnly.toList();
+          videoStreams.sort((a, b) =>
               b.videoResolution.height.compareTo(a.videoResolution.height));
-          for (final s in muxed) {
+          
+          VideoOnlyStreamInfo? bestVideoOnly;
+          for (final s in videoStreams) {
             if (s.videoResolution.height <= resNum) {
-              bestStream = s;
+              bestVideoOnly = s;
               break;
             }
           }
-          bestStream ??= muxed.isNotEmpty
-              ? muxed.first
-              : manifest.muxed.withHighestBitrate();
-          streamInfo = bestStream;
-          resolvedFormat = bestStream.container.name;
-          resolvedResolution = '${bestStream.videoResolution.height}p';
+          bestVideoOnly ??= videoStreams.isNotEmpty ? videoStreams.first : null;
+          
+          final audioStream = manifest.audioOnly.withHighestBitrate();
+          
+          if (bestVideoOnly != null && bestVideoOnly.videoResolution.height > 360) {
+            isDash = true;
+            streamUrl = bestVideoOnly.url.toString();
+            audioStreamUrl = audioStream.url.toString();
+            resolvedFormat = 'mp4';
+            resolvedResolution = '${bestVideoOnly.videoResolution.height}p';
+            videoStreamSize = bestVideoOnly.size.totalBytes;
+            audioStreamSize = audioStream.size.totalBytes;
+            sizeMb = (videoStreamSize + audioStreamSize) / (1024 * 1024);
+          } else {
+            final muxed = manifest.muxed.toList();
+            MuxedStreamInfo? bestMuxed;
+            muxed.sort((a, b) =>
+                b.videoResolution.height.compareTo(a.videoResolution.height));
+            for (final s in muxed) {
+              if (s.videoResolution.height <= resNum) {
+                bestMuxed = s;
+                break;
+              }
+            }
+            bestMuxed ??= muxed.isNotEmpty
+                ? muxed.first
+                : manifest.muxed.withHighestBitrate();
+            streamUrl = bestMuxed.url.toString();
+            resolvedFormat = bestMuxed.container.name;
+            resolvedResolution = '${bestMuxed.videoResolution.height}p';
+            sizeMb = bestMuxed.size.totalMegaBytes;
+          }
         }
-        streamUrl = streamInfo.url.toString();
-        sizeMb = streamInfo.size.totalMegaBytes;
       } else {
         // Social media or direct URL
         if (directUrl != null) {
@@ -542,31 +718,45 @@ class DownloadService {
           resolvedFormat = 'mp4';
           resolvedResolution = useRes;
         } else {
-          // We need to fetch from SocialDownloadService
           final social = SocialDownloadService();
           final info = await social.fetchInfo(cleanUrl);
           videoTitle = info.title;
           thumb = info.thumbnailUrl;
-          
-          // Robust fuzzy matching for resolution
-          final targetHeight = int.tryParse(useRes.replaceAll(RegExp(r'[^0-9]'), '')) ?? 1080;
-          
+
+          // Parse requested target height (0 = no numeric preference = use highest)
+          final targetHeight = useRes == 'Always Ask'
+              ? 0
+              : (int.tryParse(useRes.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0);
+
+          // Sort variants: highest quality first
+          final sortedVariants = List<VideoVariant>.from(info.variants);
+          sortedVariants.sort((a, b) {
+            final aH = _parseQualityHeight(a.quality);
+            final bH = _parseQualityHeight(b.quality);
+            return bH.compareTo(aH); // descending
+          });
+
           VideoVariant? bestVariant;
-          int closestDiff = 10000;
-          
-          for (final v in info.variants) {
-            final vHeight = int.tryParse(v.quality.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
-            if (vHeight == 0) continue; // Skip variants with non-numeric quality labels if any
-            
-            final diff = (vHeight - targetHeight).abs();
-            // Prioritize variants that don't exceed targetHeight, or are the closest
-            if (vHeight <= targetHeight && diff < closestDiff) {
-              bestVariant = v;
-              closestDiff = diff;
+
+          if (targetHeight <= 0) {
+            // No preference — pick the highest quality available
+            bestVariant = sortedVariants.first;
+          } else {
+            // Pick the closest variant that is ≤ targetHeight
+            int closestDiff = 10000;
+            for (final v in sortedVariants) {
+              final vHeight = _parseQualityHeight(v.quality);
+              final diff = (vHeight - targetHeight).abs();
+              if (vHeight <= targetHeight && diff < closestDiff) {
+                bestVariant = v;
+                closestDiff = diff;
+              }
             }
+            // If no variant ≤ target, fall back to the highest available
+            bestVariant ??= sortedVariants.first;
           }
-          
-          final variant = bestVariant ?? info.variants.first;
+
+          final variant = bestVariant;
           streamUrl = variant.url;
           resolvedFormat = variant.format;
           resolvedResolution = variant.quality;
@@ -578,12 +768,10 @@ class DownloadService {
           existingItem.filePath != null &&
           existingItem.filePath!.isNotEmpty) {
         savePath = existingItem.filePath!;
-        // Ensure the directory exists (might have been deleted)
         final dir = Directory(p.dirname(savePath));
         if (!await dir.exists()) await dir.create(recursive: true);
       } else {
         final safeTitle = videoTitle.replaceAll(RegExp(r'[<>:"/\\|?*]'), '_');
-        // Prefix with timestamp for ordering (YYMMDD_HHMMSS)
         final nowTime = DateTime.now();
         final timestamp =
             '${nowTime.year}${nowTime.month.toString().padLeft(2, '0')}${nowTime.day.toString().padLeft(2, '0')}_'
@@ -595,7 +783,6 @@ class DownloadService {
 
         savePath = p.join(dir.path, fileName);
 
-        // Handle potential collisions
         int counter = 1;
         while (await File(savePath).exists()) {
           fileName = '${timestamp}_${safeTitle}_($counter).$resolvedFormat';
@@ -632,148 +819,202 @@ class DownloadService {
       await db.updateDownload(item.toCompanion());
       pingUi();
 
-      // ── 3. Check for partial file (resume) ──
-      final file = File(savePath);
-      int startByte = 0;
-      if (await file.exists()) {
-        startByte = await file.length();
-        debugPrint('[DownloadService] Resuming from byte $startByte');
-      }
-
-      // ── 4. Download with Dio ──
       final cancelToken = CancelToken();
       _tokens[id] = cancelToken;
 
-      final options = Options(
-        responseType: ResponseType.stream,
-        headers: startByte > 0 ? {'Range': 'bytes=$startByte-'} : null,
-      );
+      int downloadedBytes = 0;
+      int fullSize = 0;
 
-      final response = await dio.get<ResponseBody>(
-        streamUrl,
-        options: options,
-        cancelToken: cancelToken,
-      );
+      if (isDash) {
+        final videoTempPath = '$savePath.temp_v';
+        final audioTempPath = '$savePath.temp_a';
 
-      // If we asked for a range but didn't get 206 (Partial Content),
-      // it means the server doesn't support ranges or the file changed.
-      // We should probably start over in that case.
-      final isPartial = response.statusCode == 206;
-      if (startByte > 0 && !isPartial) {
-        debugPrint('[DownloadService] Server does not support resume. Starting over.');
-        startByte = 0;
-        // Re-open sink in write mode to truncate
-      }
+        final videoFile = File(videoTempPath);
+        final audioFile = File(audioTempPath);
 
-      final totalBytes =
-          int.tryParse(response.headers.value('content-length') ?? '0') ?? 0;
-      final fullSize = isPartial ? (totalBytes + startByte) : totalBytes;
+        int videoDownloaded = 0;
+        int audioDownloaded = 0;
 
-      if (sizeMb == 0 && fullSize > 0) {
-        item.fileSizeMb = fullSize / (1024 * 1024);
-        await db.updateDownload(item.toCompanion());
-      }
-
-      final sink = file.openWrite(
-          mode: (startByte > 0 && isPartial) ? FileMode.append : FileMode.write);
-      int downloadedBytes = startByte;
-      DateTime lastUpdate = DateTime.now();
-      int lastBytes = startByte;
-
-      try {
-        await for (final chunk in response.data!.stream) {
-          if (_paused[id] == true) {
-            debugPrint('[DownloadService] Stream loop: pause detected for $id');
-            break;
-          }
-          sink.add(chunk);
-          downloadedBytes += chunk.length;
-
-          // Battery saver: throttle chunk processing
-          if (batterySaver) {
-            await Future.delayed(const Duration(milliseconds: 80));
-          }
-
-          final now = DateTime.now();
-          final diffMs = now.difference(lastUpdate).inMilliseconds;
-          if (diffMs >= 800) {
-            // Check network constraints dynamically during active download
-            if (!await _canDownload()) {
-              debugPrint(
-                  '[DownloadService] Dynamic network check failed. Pausing.');
-              _paused[id] = true;
-              break;
-            }
-
-            final progress = fullSize > 0 ? downloadedBytes / fullSize : 0.0;
-            final speed = ((downloadedBytes - lastBytes) / (diffMs / 1000)) /
-                (1024 * 1024);
-            final eta = speed > 0
-                ? ((fullSize - downloadedBytes) / (speed * 1024 * 1024)).toInt()
-                : 0;
-
-            lastUpdate = now;
-            lastBytes = downloadedBytes;
-
-            item.progress = progress;
-            item.speedMbps = speed;
-            item.etaSeconds = eta;
-            item.status = DownloadStatus.downloading;
-            await db.updateDownload(item.toCompanion());
-            pingUi();
-
-            await NotificationService().showProgressNotification(
-              id: notifId,
-              title: item.title,
-              body:
-                  '${item.progressLabel} • ${item.resolution} ${item.format.toUpperCase()} • ${item.speedLabel} • ETA ${item.etaLabel}',
-              progress: (progress * 100).toInt(),
-              maxProgress: 100,
-              actions: [
-                const AndroidNotificationAction('pause', 'Pause',
-                    showsUserInterface: false),
-                const AndroidNotificationAction('cancel', 'Cancel',
-                    showsUserInterface: false),
-              ],
-              payload: id,
-            );
-          }
+        if (await videoFile.exists()) {
+          videoDownloaded = await videoFile.length();
         }
-      } finally {
-        await sink.flush();
-        await sink.close();
+
+        if (await audioFile.exists()) {
+          audioDownloaded = await audioFile.length();
+        }
+
+        fullSize = videoStreamSize + audioStreamSize;
+
+        // 1. Download video
+        if (videoDownloaded < videoStreamSize) {
+          videoDownloaded = await _downloadStreamChunked(
+            id: id,
+            url: streamUrl,
+            tempPath: videoTempPath,
+            startByte: videoDownloaded,
+            totalStreamBytes: videoStreamSize,
+            overallProgressStart: 0,
+            overallTotalBytes: fullSize,
+            cancelToken: cancelToken,
+            item: item,
+            notifId: notifId,
+            batterySaver: batterySaver,
+          );
+        }
+
+        // 2. Download audio
+        if (_paused[id] != true && videoDownloaded >= videoStreamSize && audioDownloaded < audioStreamSize) {
+          audioDownloaded = await _downloadStreamChunked(
+            id: id,
+            url: audioStreamUrl!,
+            tempPath: audioTempPath,
+            startByte: audioDownloaded,
+            totalStreamBytes: audioStreamSize,
+            overallProgressStart: videoStreamSize,
+            overallTotalBytes: fullSize,
+            cancelToken: cancelToken,
+            item: item,
+            notifId: notifId,
+            batterySaver: batterySaver,
+          );
+        }
+
+        downloadedBytes = videoDownloaded + audioDownloaded;
+      } else {
+        final file = File(savePath);
+        int startByte = 0;
+        if (await file.exists()) {
+          startByte = await file.length();
+          debugPrint('[DownloadService] Resuming from byte $startByte');
+        }
+
+        downloadedBytes = await _downloadStreamChunked(
+          id: id,
+          url: streamUrl,
+          tempPath: savePath,
+          startByte: startByte,
+          totalStreamBytes: 0,
+          overallProgressStart: 0,
+          overallTotalBytes: 0,
+          cancelToken: cancelToken,
+          item: item,
+          notifId: notifId,
+          batterySaver: batterySaver,
+        );
+
+        if (await file.exists()) {
+          fullSize = await file.length();
+        }
       }
 
       // ── 5. Evaluate outcome ──
       if (_paused[id] == true) {
-        _paused.remove(id); // Clear flag after handling
-        item.status = DownloadStatus.paused;
-        item.progress = fullSize > 0 ? downloadedBytes / fullSize : 0;
-        item.speedMbps = 0;
-        item.etaSeconds = 0;
-        await db.updateDownload(item.toCompanion());
-        pingUi();
+        _paused.remove(id);
+        final itemRecord = await db.getDownloadById(id);
+        if (itemRecord != null) {
+          item.status = DownloadStatus.paused;
+          item.progress = fullSize > 0 ? downloadedBytes / fullSize : 0;
+          item.speedMbps = 0;
+          item.etaSeconds = 0;
+          await db.updateDownload(item.toCompanion());
+          pingUi();
 
-        // Show a "Paused" notification with a Resume button
-        await NotificationService().showProgressNotification(
-          id: notifId,
-          title: item.title,
-          body: 'Paused • ${item.progressLabel}',
-          progress: (item.progress * 100).toInt(),
-          maxProgress: 100,
-          ongoing: false, // Not ongoing when paused
-          actions: [
-            const AndroidNotificationAction('resume', 'Resume',
-                showsUserInterface: false),
-            const AndroidNotificationAction('cancel', 'Cancel',
-                showsUserInterface: false),
-          ],
-          payload: id,
-        );
-        debugPrint('[DownloadService] Paused: $id');
+          await NotificationService().showProgressNotification(
+            id: notifId,
+            title: item.title,
+            body: 'Paused • ${item.progressLabel}',
+            progress: (item.progress * 100).toInt(),
+            maxProgress: 100,
+            ongoing: false,
+            actions: [
+              const AndroidNotificationAction('resume', 'Resume',
+                  showsUserInterface: false),
+              const AndroidNotificationAction('cancel', 'Cancel',
+                  showsUserInterface: false),
+            ],
+            payload: id,
+          );
+          debugPrint('[DownloadService] Paused: $id');
+        } else {
+          // Deleted from DB (cancelled) — delete files
+          debugPrint('[DownloadService] Cancelled and deleted from DB: $id');
+          final videoTempFile = File('$savePath.temp_v');
+          if (await videoTempFile.exists()) await videoTempFile.delete();
+          final audioTempFile = File('$savePath.temp_a');
+          if (await audioTempFile.exists()) await audioTempFile.delete();
+          final file = File(savePath);
+          if (await file.exists()) await file.delete();
+          await NotificationService().cancel(notifId);
+        }
       } else {
         // Completed
-        if (useAudioOnly) {
+        if (isDash) {
+          debugPrint('[DownloadService] Starting DASH stream merge for $id...');
+          item.status = DownloadStatus.processing;
+          item.progress = 1.0;
+          await db.updateDownload(item.toCompanion());
+          pingUi();
+
+          await NotificationService().showProgressNotification(
+            id: notifId,
+            title: 'Merging video & audio...',
+            body: item.title,
+            progress: 0,
+            maxProgress: 100,
+            showProgress: true,
+            ongoing: true,
+            payload: id,
+          );
+
+          final videoTempPath = '$savePath.temp_v';
+          final audioTempPath = '$savePath.temp_a';
+
+          final session = await FFmpegKit.execute(
+            '-y -i "$videoTempPath" -i "$audioTempPath" -c:v copy -c:a aac "$savePath"',
+          );
+
+          final rc = await session.getReturnCode();
+
+          if (ReturnCode.isSuccess(rc)) {
+            try {
+              final fv = File(videoTempPath);
+              if (await fv.exists()) await fv.delete();
+              final fa = File(audioTempPath);
+              if (await fa.exists()) await fa.delete();
+            } catch (e) {
+              debugPrint('[DownloadService] Failed to delete DASH temp files: $e');
+            }
+
+            final outputFile = File(savePath);
+            final double actualSizeMb = (await outputFile.length()) / (1024 * 1024);
+
+            item.status = DownloadStatus.completed;
+            item.progress = 1.0;
+            item.filePath = savePath;
+            item.fileSizeMb = actualSizeMb;
+            await db.updateDownload(item.toCompanion());
+            pingUi();
+
+            try {
+              const methodChannel =
+                  MethodChannel('com.downloda.app/media_scanner');
+              await methodChannel.invokeMethod('scanFile', {'path': savePath});
+            } catch (e) {
+              debugPrint('[DownloadService] Media scan error: $e');
+            }
+
+            await NotificationService().showCompletionNotification(
+              id: notifId,
+              title: 'Download Complete',
+              body: '${item.title} • ${item.resolution} MP4 • ${actualSizeMb.toStringAsFixed(1)} MB',
+              payload: id,
+            );
+          } else {
+            final logs = await session.getLogsAsString();
+            debugPrint('[DownloadService] FFmpeg DASH merge failure logs: $logs');
+            throw Exception('Merging video and audio failed');
+          }
+        } else if (useAudioOnly) {
           debugPrint('[DownloadService] Starting audio extraction for $id...');
           item.status = DownloadStatus.processing;
           item.progress = 1.0;
@@ -802,7 +1043,6 @@ class DownloadService {
           final rc = await session.getReturnCode();
 
           if (ReturnCode.isSuccess(rc)) {
-            // Delete raw video file
             try {
               final rawFile = File(savePath);
               if (await rawFile.exists()) {
@@ -823,7 +1063,6 @@ class DownloadService {
             await db.updateDownload(item.toCompanion());
             pingUi();
 
-            // Scan MP3 file
             try {
               const methodChannel =
                   MethodChannel('com.downloda.app/media_scanner');
@@ -832,7 +1071,6 @@ class DownloadService {
               debugPrint('[DownloadService] Media scan error: $e');
             }
 
-            // Show completion notification
             await NotificationService().showCompletionNotification(
               id: notifId,
               title: 'Download Complete',
@@ -846,12 +1084,15 @@ class DownloadService {
             throw Exception('Audio extraction failed');
           }
         } else {
+          final file = File(savePath);
+          if (await file.exists()) {
+            item.fileSizeMb = (await file.length()) / (1024 * 1024);
+          }
           item.status = DownloadStatus.completed;
           item.progress = 1.0;
           await db.updateDownload(item.toCompanion());
           pingUi();
 
-          // Scan media so it shows in gallery
           try {
             const methodChannel =
                 MethodChannel('com.downloda.app/media_scanner');
@@ -860,12 +1101,10 @@ class DownloadService {
             debugPrint('[DownloadService] Media scan error: $e');
           }
 
-          // Show completion notification
           await NotificationService().showCompletionNotification(
             id: notifId,
             title: 'Download Complete',
-            body:
-                '${item.title} • $resolvedResolution ${resolvedFormat.toUpperCase()} • ${item.fileSizeMb.toStringAsFixed(1)} MB',
+            body: '${item.title} • ${item.resolution} ${item.format.toUpperCase()} • ${item.fileSizeLabel}',
             payload: id,
           );
         }
@@ -909,6 +1148,33 @@ class DownloadService {
             );
           }
         } else {
+          final record = await db.getDownloadById(id);
+          if (record != null) {
+            final file = File(record.filePath ?? '');
+            if (await file.exists()) {
+              try {
+                await file.delete();
+              } catch (e) {
+                debugPrint('[DownloadService] Failed to delete cancelled file: $e');
+              }
+            }
+            final videoTempFile = File('${record.filePath}.temp_v');
+            if (await videoTempFile.exists()) {
+              try {
+                await videoTempFile.delete();
+              } catch (e) {
+                debugPrint('[DownloadService] Failed to delete cancelled video temp: $e');
+              }
+            }
+            final audioTempFile = File('${record.filePath}.temp_a');
+            if (await audioTempFile.exists()) {
+              try {
+                await audioTempFile.delete();
+              } catch (e) {
+                debugPrint('[DownloadService] Failed to delete cancelled audio temp: $e');
+              }
+            }
+          }
           await db.deleteDownload(id);
           await NotificationService().cancel(notifId);
         }
@@ -1024,6 +1290,147 @@ class DownloadService {
       return MediaPlatform.x;
     }
     return MediaPlatform.youtube;
+  }
+
+  int _parseQualityHeight(String quality) {
+    final clean = quality.toLowerCase();
+    if (clean.contains('hd') || clean.contains('high quality')) return 1080;
+    final num = int.tryParse(clean.replaceAll(RegExp(r'[^0-9]'), ''));
+    if (num != null && num > 0) return num;
+    if (clean.contains('without watermark') || clean.contains('no watermark') || clean.contains('watermark')) {
+      if (clean.contains('2') || clean.contains('backup')) return 480;
+      return 720;
+    }
+    return 360;
+  }
+
+  Future<void> resetActiveDownloadsToPaused() async {
+    try {
+      final active = await db.getActiveDownloads();
+      for (final item in active) {
+        if (item.status == DownloadStatus.preparing ||
+            item.status == DownloadStatus.downloading ||
+            item.status == DownloadStatus.processing) {
+          final companion = item.toCompanion(false).copyWith(
+            status: const Value(DownloadStatus.paused),
+            speedMbps: const Value(0.0),
+            etaSeconds: const Value(0),
+          );
+          await db.updateDownload(companion);
+        }
+      }
+      pingUi();
+    } catch (e, st) {
+      debugPrint('[DownloadService] Error resetting active downloads: $e\n$st');
+    }
+  }
+
+  Future<String?> _generateLocalThumbnail(String id, String videoPath) async {
+    try {
+      final appDocsDir = await getApplicationDocumentsDirectory();
+      final thumbDir = Directory(p.join(appDocsDir.path, '.thumbnails'));
+      if (!await thumbDir.exists()) {
+        await thumbDir.create(recursive: true);
+      }
+      final thumbPath = p.join(thumbDir.path, '$id.jpg');
+
+      // Try native MediaMetadataRetriever first (extremely fast and reliable on Android)
+      try {
+        const methodChannel = MethodChannel('com.downloda.app/media_scanner');
+        final bytes = await methodChannel.invokeMethod<Uint8List>(
+          'getVideoThumbnail',
+          {'path': videoPath},
+        );
+        if (bytes != null && bytes.isNotEmpty) {
+          final file = File(thumbPath);
+          await file.writeAsBytes(bytes);
+          return thumbPath;
+        }
+      } catch (e) {
+        debugPrint('[DownloadService] Failed to generate offline thumbnail via native channel: $e');
+      }
+
+      // Fallback to FFmpeg Kit execution
+      final session = await FFmpegKit.execute(
+        '-y -ss 00:00:01 -i "$videoPath" -vframes 1 "$thumbPath"',
+      );
+      final rc = await session.getReturnCode();
+      if (ReturnCode.isSuccess(rc)) {
+        return thumbPath;
+      }
+    } catch (e) {
+      debugPrint('[DownloadService] Failed to generate offline thumbnail via FFmpeg: $e');
+    }
+    return null;
+  }
+
+  Future<void> syncLocalDownloads() async {
+    try {
+      final dir = Directory('/storage/emulated/0/Download/Downloda');
+      if (!await dir.exists()) return;
+
+      final files = await dir.list().toList();
+      final allItems = await db.getHistory();
+      final existingPaths = allItems.map((e) => e.filePath).whereType<String>().toSet();
+
+      for (final entity in files) {
+        if (entity is File) {
+          final filePath = entity.path;
+          final ext = p.extension(filePath).toLowerCase();
+          if (ext != '.mp4' && ext != '.mp3') continue;
+
+          // If already in the DB, skip it
+          if (existingPaths.contains(filePath)) continue;
+
+          // Extract title
+          String fileName = p.basenameWithoutExtension(filePath);
+          final regExp = RegExp(r'^\d{8}_\d{6}_(.*)$');
+          final match = regExp.firstMatch(fileName);
+          String title = fileName;
+          if (match != null && match.groupCount >= 1) {
+            title = match.group(1)!.replaceAll('_', ' ');
+          } else {
+            title = title.replaceAll('_', ' ');
+          }
+
+          // Guess platform
+          MediaPlatform platform = _detectPlatform(filePath);
+
+          // Determine format and resolution
+          final format = ext.substring(1);
+          final resolution = format == 'mp3' ? 'Audio' : 'Best Quality';
+          final fileSizeMb = await entity.length() / (1024.0 * 1024.0);
+
+          final itemId = const Uuid().v4();
+          String? thumbUrl;
+          if (format == 'mp4') {
+            thumbUrl = await _generateLocalThumbnail(itemId, filePath);
+          }
+
+          final item = DownloadItem(
+            id: itemId,
+            title: title,
+            url: '',
+            platform: platform,
+            status: DownloadStatus.completed,
+            progress: 1.0,
+            speedMbps: 0.0,
+            etaSeconds: 0,
+            thumbnailUrl: thumbUrl,
+            format: format,
+            resolution: resolution,
+            filePath: filePath,
+            fileSizeMb: fileSizeMb,
+            addedAt: (await entity.stat()).changed,
+          );
+
+          await db.insertDownload(item.toCompanion());
+        }
+      }
+      pingUi();
+    } catch (e, st) {
+      debugPrint('[DownloadService] Error syncing local downloads: $e\n$st');
+    }
   }
 }
 
