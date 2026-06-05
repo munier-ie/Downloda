@@ -54,7 +54,6 @@ dependencies:
   ffmpeg_kit_flutter_new: ^4.1.0
   connectivity_plus: ^7.1.1
   html: ^0.15.6
-  lottie: ^3.3.3
   url_launcher: ^6.3.2
   device_info_plus: ^13.1.0
   cached_network_image: ^3.4.1
