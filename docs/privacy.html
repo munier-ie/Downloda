@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Privacy Policy — Downloda</title>
+  <meta name="description" content="Privacy Policy for Downloda — a 100% private, tracker-free background media downloader. Learn how we keep your data local and secure.">
+  <link rel="icon" type="image/png" href="favicon.png">
+
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "page-bg": "var(--bg)",
+            "panel-bg": "var(--surface)",
+            "soft-card": "var(--elevated)",
+            "text": "var(--text)",
+            "muted": "var(--muted)",
+            "muted-light": "var(--muted-light)",
+            "line": "var(--line)",
+            "accent": "var(--accent)",
+            "accent-dim": "var(--accent-dim)",
+            "success": "var(--success)",
+            "failure": "var(--failure)",
+            "warning": "var(--warning)",
+          },
+          fontFamily: {
+            "sans": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "display": ["Outfit", "system-ui", "sans-serif"]
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    :root {
+      --bg: #F8F5F2;
+      --surface: #FFFFFF;
+      --elevated: #EDE8E3;
+      --text: #385144;
+      --muted: #5C7A6B;
+      --muted-light: #8AAB9A;
+      --line: #D9D2CA;
+      --accent: #385144;
+      --accent-dim: rgba(56, 81, 68, 0.12);
+      --success: #2D7A4F;
+      --failure: #C0392B;
+      --warning: #D4870A;
+    }
+    html.dark {
+      --bg: #385144;
+      --surface: #2E4238;
+      --elevated: #26382F;
+      --text: #F8F5F2;
+      --muted: #BFD4C8;
+      --muted-light: #7AA38E;
+      --line: #26382F;
+      --accent: #F8F5F2;
+      --accent-dim: rgba(248, 245, 242, 0.15);
+      --success: #5DBE8A;
+      --failure: #E57373;
+      --warning: #FFB74D;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--line);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--muted);
+    }
+  </style>
+</head>
+<body class="text-text min-h-screen antialiased bg-page-bg">
+
+  <header class="fixed top-[24px] left-0 right-0 z-50 flex items-center justify-center px-4 w-full pointer-events-none">
+    <div class="pointer-events-auto w-full max-w-[1140px] flex items-center justify-between bg-[#F8F5F2]/95 dark:bg-[#2E4238]/95 backdrop-blur-xl rounded-full px-4 sm:px-6 shadow-xl border border-[#D9D2CA] dark:border-[#26382F] h-[72px]">
+      <div class="flex items-center gap-4 sm:gap-8 pl-2">
+        <a class="flex items-center gap-3" href="index.html" title="Downloda Home">
+          <img src="logos/logo.png" alt="Downloda Brand Logo" class="w-8 h-8 rounded-xl shadow-md border border-slate-200/80 dark:border-white/10" />
+          <span class="font-display font-extrabold text-[#385144] dark:text-[#F8F5F2] text-lg tracking-tight hover:opacity-70 transition-opacity">Downloda</span>
+        </a>
+      </div>
+      
+      <div class="flex items-center gap-2 sm:gap-4">
+        <button id="theme-toggle-btn" class="w-10 h-10 rounded-full bg-[#EDE8E3] dark:bg-[#26382F] hover:bg-[#D9D2CA] dark:hover:bg-[#1E2E25] text-[#385144] dark:text-[#F8F5F2] flex items-center justify-center shrink-0 border border-[#D9D2CA] dark:border-[#26382F] transition-colors pointer-events-auto" title="Toggle color scheme">
+          <span id="theme-toggle-icon" class="material-symbols-outlined text-[20px]">light_mode</span>
+        </button>
+
+        <a href="index.html" class="bg-[#385144] hover:bg-[#2E4238] text-[#F8F5F2] dark:bg-[#F8F5F2] dark:hover:bg-[#EDE8E3] dark:text-[#385144] font-sans font-bold rounded-full transition-all duration-300 shrink-0 flex items-center px-4 sm:px-6 text-[10px] sm:text-[10.5px] h-[38px] sm:h-[42px] uppercase tracking-widest shadow-sm pointer-events-auto">
+          Back to Home
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="pt-[150px] pb-[100px] px-6 max-w-4xl mx-auto relative z-10">
+    <div class="absolute top-0 left-[50%] -translate-x-[50%] w-[400px] h-[400px] bg-accent/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
+
+    <article class="bg-panel-bg border border-line rounded-[32px] p-8 md:p-12 shadow-xl relative z-10 transition-colors duration-300">
+      <h1 class="font-display text-4xl md:text-5xl font-extrabold tracking-tight mb-2">Privacy Policy</h1>
+      <p class="font-sans text-xs text-muted mb-8">Last updated: June 6, 2026</p>
+
+      <div class="space-y-8 font-sans text-sm text-text/90 leading-relaxed">
+        <section>
+          <h2 class="font-display text-xl font-bold text-text mb-3">1. Overview</h2>
+          <p>
+            Downloda is built from the ground up to respect user privacy. Unlike typical media downloader utilities, Downloda has <strong>no tracking scripts, no advertisements, and requires no account creation</strong>. Everything occurs locally on your own Android device, ensuring absolute privacy.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-bold text-text mb-3">2. Data Collection & Usage</h2>
+          <p>
+            Downloda collects <strong>no personal information</strong>. Specifically:
+          </p>
+          <ul class="list-disc pl-5 mt-2 space-y-1.5">
+            <li><strong>No Accounts:</strong> You do not need to register, sign up, or log in to use Downloda.</li>
+            <li><strong>No Trackers:</strong> We do not include any tracking software, telemetry SDKs, analytical tools, or cookies inside the app.</li>
+            <li><strong>No Usage Logging:</strong> Your download logs, URL history, and favorite presets are stored exclusively in your local database using Drift (SQLite) on your own device and are never transmitted to us or any external servers.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-bold text-text mb-3">3. Media Processing & Storage</h2>
+          <p>
+            All media downloads, stream merging (DASH muxing), and conversions (video to MP3 audio encoding) are processed <strong>entirely locally</strong> on your own device using native processes and FFmpeg. 
+          </p>
+          <p class="mt-2">
+            No video or audio content is uploaded, routed through proxy servers, or stored on external servers under our control. The downloaded media files are written directly into your device's default storage folder (typically <code>/Download/Downloda</code>).
+          </p>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-bold text-text mb-3">4. System Permissions Used</h2>
+          <p>
+            To perform background media operations natively, Downloda requests the following Android system permissions:
+          </p>
+          <ul class="list-disc pl-5 mt-2 space-y-1.5">
+            <li><strong>INTERNET:</strong> Required to retrieve stream metadata and download the media chunks from the content host.</li>
+            <li><strong>FOREGROUND_SERVICE:</strong> Required to keep downloads running reliably in the background without interruptions from Android's resource managers.</li>
+            <li><strong>POST_NOTIFICATIONS:</strong> Required to display the download progress bar, queue status, speed metrics, and completion notifications.</li>
+            <li><strong>Storage/Media Access:</strong> Used to write the downloaded files directly to your device’s Download directory.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-bold text-text mb-3">5. Third-Party Integrations</h2>
+          <p>
+            Downloda directly interfaces with public Content Delivery Networks (CDNs) of social media platforms (e.g., YouTube's googlevideo servers) or your self-hosted API backend (<code>universal_downloader</code>) to parse stream URLs. When you request a download, your device communicates directly with these CDNs. These third-party services may process your IP address and request metadata in accordance with their own respective privacy policies.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-bold text-text mb-3">6. Open Source</h2>
+          <p>
+            Downloda is fully open-source. Anyone can review the complete codebase on <a href="https://github.com/munier-ie/Downloda" target="_blank" class="font-semibold underline hover:text-muted">GitHub</a> to verify our security implementation and confirm our zero-tracking, offline-first privacy standards.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-bold text-text mb-3">7. Contact</h2>
+          <p>
+            If you have any questions or concerns about our privacy standards, feel free to open a discussion or file an issue on our GitHub repository.
+          </p>
+        </section>
+      </div>
+    </article>
+  </main>
+
+  <footer class="py-12 border-t border-line bg-[#EDE8E3] dark:bg-[#2E4238] transition-colors duration-300">
+    <div class="max-w-4xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted">
+      <span>© 2026 Munier. Downloda is licensed under the MIT License.</span>
+      <div class="flex gap-6">
+        <a class="hover:text-text transition-colors" href="index.html">Home</a>
+        <a class="hover:text-text transition-colors font-bold" href="terms.html">Terms of Use</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+    const themeToggleIcon = document.getElementById('theme-toggle-icon');
+
+    function applyTheme(theme) {
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+        themeToggleIcon.textContent = 'light_mode';
+      } else {
+        document.documentElement.classList.remove('dark');
+        themeToggleIcon.textContent = 'dark_mode';
+      }
+      localStorage.setItem('theme', theme);
+    }
+
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    applyTheme(savedTheme);
+
+    themeToggleBtn.addEventListener('click', () => {
+      const currentTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+      applyTheme(currentTheme);
+    });
+  </script>
+</body>
+</html>

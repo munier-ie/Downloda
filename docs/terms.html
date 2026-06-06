@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Terms of Use — Downloda</title>
+  <meta name="description" content="Terms of Use for Downloda — a free, open-source media utility. Understand our guidelines, MIT license terms, and download compliance.">
+  <link rel="icon" type="image/png" href="favicon.png">
+
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "page-bg": "var(--bg)",
+            "panel-bg": "var(--surface)",
+            "soft-card": "var(--elevated)",
+            "text": "var(--text)",
+            "muted": "var(--muted)",
+            "muted-light": "var(--muted-light)",
+            "line": "var(--line)",
+            "accent": "var(--accent)",
+            "accent-dim": "var(--accent-dim)",
+            "success": "var(--success)",
+            "failure": "var(--failure)",
+            "warning": "var(--warning)",
+          },
+          fontFamily: {
+            "sans": ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+            "display": ["Outfit", "system-ui", "sans-serif"]
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    :root {
+      --bg: #F8F5F2;
+      --surface: #FFFFFF;
+      --elevated: #EDE8E3;
+      --text: #385144;
+      --muted: #5C7A6B;
+      --muted-light: #8AAB9A;
+      --line: #D9D2CA;
+      --accent: #385144;
+      --accent-dim: rgba(56, 81, 68, 0.12);
+      --success: #2D7A4F;
+      --failure: #C0392B;
+      --warning: #D4870A;
+    }
+    html.dark {
+      --bg: #385144;
+      --surface: #2E4238;
+      --elevated: #26382F;
+      --text: #F8F5F2;
+      --muted: #BFD4C8;
+      --muted-light: #7AA38E;
+      --line: #26382F;
+      --accent: #F8F5F2;
+      --accent-dim: rgba(248, 245, 242, 0.15);
+      --success: #5DBE8A;
+      --failure: #E57373;
+      --warning: #FFB74D;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--line);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--muted);
+    }
+  </style>
+</head>
+<body class="text-text min-h-screen antialiased bg-page-bg">
+
+  <header class="fixed top-[24px] left-0 right-0 z-50 flex items-center justify-center px-4 w-full pointer-events-none">
+    <div class="pointer-events-auto w-full max-w-[1140px] flex items-center justify-between bg-[#F8F5F2]/95 dark:bg-[#2E4238]/95 backdrop-blur-xl rounded-full px-4 sm:px-6 shadow-xl border border-[#D9D2CA] dark:border-[#26382F] h-[72px]">
+      <div class="flex items-center gap-4 sm:gap-8 pl-2">
+        <a class="flex items-center gap-3" href="index.html" title="Downloda Home">
+          <img src="logos/logo.png" alt="Downloda Brand Logo" class="w-8 h-8 rounded-xl shadow-md border border-slate-200/80 dark:border-white/10" />
+          <span class="font-display font-extrabold text-[#385144] dark:text-[#F8F5F2] text-lg tracking-tight hover:opacity-70 transition-opacity">Downloda</span>
+        </a>
+      </div>
+      
+      <div class="flex items-center gap-2 sm:gap-4">
+        <button id="theme-toggle-btn" class="w-10 h-10 rounded-full bg-[#EDE8E3] dark:bg-[#26382F] hover:bg-[#D9D2CA] dark:hover:bg-[#1E2E25] text-[#385144] dark:text-[#F8F5F2] flex items-center justify-center shrink-0 border border-[#D9D2CA] dark:border-[#26382F] transition-colors pointer-events-auto" title="Toggle color scheme">
+          <span id="theme-toggle-icon" class="material-symbols-outlined text-[20px]">light_mode</span>
+        </button>
+
+        <a href="index.html" class="bg-[#385144] hover:bg-[#2E4238] text-[#F8F5F2] dark:bg-[#F8F5F2] dark:hover:bg-[#EDE8E3] dark:text-[#385144] font-sans font-bold rounded-full transition-all duration-300 shrink-0 flex items-center px-4 sm:px-6 text-[10px] sm:text-[10.5px] h-[38px] sm:h-[42px] uppercase tracking-widest shadow-sm pointer-events-auto">
+          Back to Home
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="pt-[150px] pb-[100px] px-6 max-w-4xl mx-auto relative z-10">
+    <div class="absolute top-0 left-[50%] -translate-x-[50%] w-[400px] h-[400px] bg-accent/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
+
+    <article class="bg-panel-bg border border-line rounded-[32px] p-8 md:p-12 shadow-xl relative z-10 transition-colors duration-300">
+      <h1 class="font-display text-4xl md:text-5xl font-extrabold tracking-tight mb-2">Terms of Use</h1>
+      <p class="font-sans text-xs text-muted mb-8">Last updated: June 6, 2026</p>
+
+      <div class="space-y-8 font-sans text-sm text-text/90 leading-relaxed">
+        <section>
+          <h2 class="font-display text-xl font-bold text-text mb-3">1. Acceptance of Terms</h2>
+          <p>
+            By downloading, installing, or using the Downloda Android application (the "Software") or visiting this website, you agree to comply with and be bound by these Terms of Use. If you do not agree to these terms, please uninstall the Software and discontinue use immediately.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-bold text-text mb-3">2. License & Open Source</h2>
+          <p>
+            Downloda is free and open-source software distributed under the terms of the **MIT License**. You may read, modify, compile, and redistribute the source code in compliance with the license, which states:
+          </p>
+          <blockquote class="border-l-4 border-line pl-4 py-1.5 my-3 text-muted italic bg-soft-card/30 rounded-r">
+            "THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
+          </blockquote>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-bold text-text mb-3">3. Permitted & Responsible Use</h2>
+          <p>
+            Downloda is a local client-side scraper utility designed for personal, offline-first media management and format conversions. You agree to use the Software only for lawful purposes. 
+          </p>
+          <p class="mt-2">
+            You are <strong>solely responsible</strong> for the media you download using Downloda. You agree to respect the copyright, intellectual property rights, and terms of service of the content host platforms (such as YouTube, TikTok, Instagram, X, Facebook, and others) from which you download media. Downloda does not grant you any ownership or rights to downloaded content.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-bold text-text mb-3">4. Disclaimer of Service Availability</h2>
+          <p>
+            Because Downloda relies on parsing public web pages and streaming formats from third-party social media platforms, its functionality is directly tied to those platforms' site structure. If a third-party platform changes its URL formats, script signatures, CDN configurations, or access controls, Downloda's download capability may degrade or stop functioning. 
+          </p>
+          <p class="mt-2">
+            We make no guarantees of continuous service availability or bug-free operations. Updates to restore functionality will be provided on a best-effort basis as open-source contributions.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-bold text-text mb-3">5. Intellectual Property of Third-Parties</h2>
+          <p>
+            All product names, logos, brands, trademarks, and registered trademarks of external social media platforms mentioned inside the Software or on this website (such as YouTube, TikTok, Instagram, Facebook, X, etc.) are the property of their respective owners. Mentioning them does not imply endorsement or affiliation.
+          </p>
+        </section>
+
+        <section>
+          <h2 class="font-display text-xl font-bold text-text mb-3">6. Changes to Terms</h2>
+          <p>
+            As Downloda evolves, these terms may be updated. Changes will be posted directly to this page. Continued use of the Software after updates constitute acceptance of the revised Terms of Use.
+          </p>
+        </section>
+      </div>
+    </article>
+  </main>
+
+  <footer class="py-12 border-t border-line bg-[#EDE8E3] dark:bg-[#2E4238] transition-colors duration-300">
+    <div class="max-w-4xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-muted">
+      <span>© 2026 Munier. Downloda is licensed under the MIT License.</span>
+      <div class="flex gap-6">
+        <a class="hover:text-text transition-colors" href="index.html">Home</a>
+        <a class="hover:text-text transition-colors font-bold" href="privacy.html">Privacy Policy</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+    const themeToggleIcon = document.getElementById('theme-toggle-icon');
+
+    function applyTheme(theme) {
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+        themeToggleIcon.textContent = 'light_mode';
+      } else {
+        document.documentElement.classList.remove('dark');
+        themeToggleIcon.textContent = 'dark_mode';
+      }
+      localStorage.setItem('theme', theme);
+    }
+
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    applyTheme(savedTheme);
+
+    themeToggleBtn.addEventListener('click', () => {
+      const currentTheme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+      applyTheme(currentTheme);
+    });
+  </script>
+</body>
+</html>

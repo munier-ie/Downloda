@@ -480,9 +480,18 @@ class DownloadService {
   }) async {
     final file = File(tempPath);
 
+    final Map<String, dynamic> headers = {};
+    if (startByte > 0) {
+      headers['Range'] = 'bytes=$startByte-';
+    }
+    if (url.contains('googlevideo.com') || url.contains('youtube') || url.contains('youtu.be')) {
+      headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36';
+      headers['Referer'] = 'https://www.youtube.com/';
+    }
+
     final options = Options(
       responseType: ResponseType.stream,
-      headers: startByte > 0 ? {'Range': 'bytes=$startByte-'} : null,
+      headers: headers,
     );
 
     final response = await dio.get<ResponseBody>(
