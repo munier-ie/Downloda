@@ -19,6 +19,15 @@ import '../database/database.dart';
 import 'notification_service.dart';
 import 'social_download_service.dart';
 
+/// Preferred YouTube API clients to try when fetching stream manifests.
+/// YouTube frequently blocks the default `androidSdkless` client with 403;
+/// using multiple clients lets the library fall back through alternatives.
+final _kYtClients = [
+  YoutubeApiClient.ios,
+  YoutubeApiClient.androidVr,
+  YoutubeApiClient.tv,
+];
+
 class DownloadService {
   final AppDatabase db;
   final YoutubeExplode yt = YoutubeExplode();
@@ -693,7 +702,7 @@ class DownloadService {
       if (platform == MediaPlatform.youtube && directUrl == null) {
         // ── 1. Fetch metadata ──
         final video = await yt.videos.get(cleanUrl);
-        final manifest = await yt.videos.streamsClient.getManifest(video.id);
+        final manifest = await yt.videos.streamsClient.getManifest(video.id, ytClients: _kYtClients);
         videoTitle = video.title;
         thumb = video.thumbnails.mediumResUrl;
 
@@ -1523,6 +1532,9 @@ class DownloadService {
         if (entity is File) {
           final name = p.basename(entity.path);
           if (name.toLowerCase().contains(targetPatternLower)) {
+            if (name.endsWith('.temp') || name.endsWith('.temp_v') || name.endsWith('.temp_a')) {
+              continue;
+            }
             return entity.path;
           }
         }

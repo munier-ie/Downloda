@@ -388,6 +388,15 @@ class _DownloadsScreenState extends ConsumerState<DownloadsScreen> with WidgetsB
                                   padding: const EdgeInsets.only(bottom: 12),
                                   child: _DownloadTile(
                                     item: filteredItems[i],
+                                    onTap: () {
+                                      final item = filteredItems[i];
+                                      final service = ref.read(downloadServiceProvider);
+                                      if (item.status == DownloadStatus.downloading || item.status == DownloadStatus.processing) {
+                                        service.pauseDownload(item.id);
+                                      } else if (item.status == DownloadStatus.paused || item.status == DownloadStatus.failed) {
+                                        service.resumeDownload(item.id, item.url);
+                                      }
+                                    },
                                     onMoreTap: () =>
                                         _showActionMenu(context, filteredItems[i]),
                                   ),
@@ -604,9 +613,10 @@ class _DownloadsScreenState extends ConsumerState<DownloadsScreen> with WidgetsB
 
 class _DownloadTile extends StatelessWidget {
   final DownloadItem item;
+  final VoidCallback onTap;
   final VoidCallback onMoreTap;
 
-  const _DownloadTile({required this.item, required this.onMoreTap});
+  const _DownloadTile({required this.item, required this.onTap, required this.onMoreTap});
 
   @override
   Widget build(BuildContext context) {
@@ -619,9 +629,12 @@ class _DownloadTile extends StatelessWidget {
     // Resolution + format badge text (skip placeholders)
     final showMeta = item.resolution != '...' && item.resolution.isNotEmpty;
 
-    return SkillListRow(
-      avatar: Stack(
-        alignment: Alignment.center,
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: SkillListRow(
+        avatar: Stack(
+          alignment: Alignment.center,
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
@@ -738,6 +751,7 @@ class _DownloadTile extends StatelessWidget {
               size: 20, color: context.colorTextSecondary),
         ),
       ),
+      ),
     );
   }
 }
@@ -800,7 +814,14 @@ class _DownloadDrawerState extends State<_DownloadDrawer> {
     setState(() => _isLoadingManifest = true);
     try {
       final yt = yt_exp.YoutubeExplode();
-      final manifest = await yt.videos.streamsClient.getManifest(widget.ytMetadata!.id);
+      final manifest = await yt.videos.streamsClient.getManifest(
+        widget.ytMetadata!.id,
+        ytClients: [
+          yt_exp.YoutubeApiClient.ios,
+          yt_exp.YoutubeApiClient.androidVr,
+          yt_exp.YoutubeApiClient.tv,
+        ],
+      );
       if (mounted) {
         setState(() {
           _ytManifest = manifest;
